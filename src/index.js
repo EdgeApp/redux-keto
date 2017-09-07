@@ -63,24 +63,28 @@ export function buildReducer (reducerMap, filterPeers) {
     }
 
     // Define the `unchanged` accessor:
-    Object.defineProperty(peers, 'unchanged', {
-      configurable: false,
-      enumerable: true,
-      get () {
-        let unchanged = true
-        for (const key of keys) {
-          try {
-            const newValue = peers[key]
-            if (newValue !== state[key]) unchanged = false
-          } catch (e) {
-            // Ignore circular reference errors, but let others pass:
-            if (e.name !== 'ReduxKetoCircularReferenceError') throw e
+    if (ourPeers && filterPeers && !ourPeers.unchanged) {
+      peers.unchanged = false
+    } else {
+      Object.defineProperty(peers, 'unchanged', {
+        configurable: false,
+        enumerable: true,
+        get () {
+          let unchanged = true
+          for (const key of keys) {
+            try {
+              const newValue = peers[key]
+              if (newValue !== state[key]) unchanged = false
+            } catch (e) {
+              // Ignore circular reference errors, but let others pass:
+              if (e.name !== 'ReduxKetoCircularReferenceError') throw e
+            }
           }
-        }
 
-        return unchanged
-      }
-    })
+          return unchanged
+        }
+      })
+    }
 
     // Evaulate all reducers while checking for changes:
     let unchanged = true

@@ -1,6 +1,6 @@
-/* global describe, it */
 import { buildReducer } from '../src/index.js'
 import { expect } from 'chai'
+import { describe, it } from 'mocha'
 import { createStore } from 'redux'
 
 describe('buildReducer', function () {
@@ -80,5 +80,27 @@ describe('buildReducer', function () {
       ReferenceError,
       /depends on its own result/
     )
+  })
+
+  it('copies parent props', function () {
+    const log = []
+    function logger (state = 0, action, peers) {
+      log.push(`${peers.unchanged} ${peers.settings}`)
+      return state
+    }
+
+    function settings (state = 0, action) {
+      return action.type === 'DIRTY' ? state + 1 : state
+    }
+
+    const rootReducer = buildReducer({
+      app: buildReducer({ logger }, ({ settings }) => ({ settings })),
+      settings
+    })
+    const store = createStore(rootReducer)
+    store.dispatch({ type: 'IRRELEVANT' })
+    store.dispatch({ type: 'DIRTY' })
+    store.dispatch({ type: 'IRRELEVANT' })
+    expect(log).to.deep.equal(['false 0', 'true 0', 'false 1', 'true 1'])
   })
 })
