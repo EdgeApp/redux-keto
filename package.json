@@ -10,11 +10,13 @@
   "files": [
     "CHANGELOG.md",
     "README.md",
+    "redux-keto.d.ts",
     "lib/*",
     "package.json"
   ],
   "main": "lib/redux-keto.js",
   "module": "lib/redux-keto.es.js",
+  "typings": "redux-keto.d.ts",
   "repository": {
     "type": "git",
     "url": "git@github.com:Airbitz/redux-keto.git"
