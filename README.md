@@ -4,9 +4,9 @@
 
 Redux works best when the reducers contain most of the business logic. Unfortunately, it's hard to make this work in practice. One problem is that reducers can't talk to each other. This library provides an easy way to let one reducer's results influence another.
 
-This is useful in many situations, such as when an application's behavior depends on its settings. If the affected reducers can't access the settings state, they can't be adjust their behavior to match. This pushes the business logic into the components and middleware, which makes the system hard to understand. The `redux-keto` library encourages the opposite approach, pushing business logic back into the reducers where it belongs. Fatter reducers mean healthier systems (hence the [name](https://en.wikipedia.org/wiki/Low-carbohydrate_diet)).
-
 The redux-keto library implements a single function, `buildReducer`, which works a lot like Redux's built-in `combineReducers` function. Besides the normal `state` and `action` parameters, this function passes a third parameter, `peers`, to each of its children. Reducers can use `peers` to pass values between each other in a fully-reactive, auto-updating way.
+
+This is useful in many situations, such as when an application's behavior depends on its settings. If the affected reducers can't access the settings state, they can't be adjust their behavior to match. This pushes the business logic into the components and middleware, which makes the system hard to understand. The `redux-keto` library encourages the opposite approach, pushing business logic back into the reducers where it belongs. Fatter reducers mean healthier systems (hence the [name](https://en.wikipedia.org/wiki/Low-carbohydrate_diet)).
 
 ## Usage
 
@@ -20,7 +20,7 @@ function maxCount (state = 0, action) {
 }
 ```
 
-The `counter` reducer is only a little more complicated, since it needs to access the `maxCount` state:
+The `counter` reducer is only a little more complicated, since it needs to consider the `maxCount` state:
 
 ```js
 function counter (state = 0, action, peers) {
@@ -65,26 +65,29 @@ function countIsOdd (state, action, peers) {
 }
 ```
 
-Now the `countIsOdd` calculation will only run when the counter actually changes. Reading the `unchanged` flag triggers extra book-keeping, so this optimization is not worthwhile if comparing the peers would be slower than the calculation being avoided.
+Now the `countIsOdd` calculation will only run when the counter actually changes. Reading the `unchanged` flag triggers extra book-keeping, so this optimization is not worthwhile if checking for changes would take longer than the calculation being avoided.
 
 ### Accessing a Parent's Peers
 
-When one `buildReducer` is nested inside another, it is sometimes useful to give the inner reducers access to the outer reducer's peers. To accomplish this, the `buildReducer` function accepts a function that maps its own peers into its children's peers:
+When one `buildReducer` is nested inside another, it is sometimes useful to give the inner reducers access to the outer reducer's peers. To accomplish this, the `buildReducer` function accepts a function that maps its own peers into its children's peers.
+
+In this example, the reducers inside `mainApp` not only have access to each other, but also to a `peers.settings` value copied in from the outside:
 
 ```js
 function filterPeers (peers) {
   return { settings: peers.settings }
 }
 
-const mainApp = buildReducer({ /* reducers... */ }, filterPeers)
-const settings = buildReducer({ /* reducers... */ })
-const rootReducer = buildReducer({ mainApp, settings })
+const rootReducer = buildReducer({
+  mainApp:  buildReducer({ /* reducers... */ }, filterPeers),
+  settings: buildReducer({ /* reducers... */ })
+})
 ```
-
-In this example, the reducers inside `mainApp` not only have access to each other, but also to a `peers.settings` value copied in from the outside.
 
 ### Circular Dependencies
 
-The `peers` parameter achieves its magic using memoized lazy evaluation. The `peers.maxCount` property in the orignal example is actually a getter function which invokes the `maxCount` reducer to calculate the new value on the spot.
+The `peers` parameter creates the illusion of time travel. It reflects the current action's outcome before all the reducers have even finished running.
+
+The `peers` parameter achieves this magic using memoized lazy evaluation. The `peers.maxCount` property in the orignal example is actually a getter function which invokes the `maxCount` reducer to calculate the new value on the spot (if `maxCount` hasn't already run).
 
 This means that circular dependencies will not work. If a reducer depends on its own output, even indirectly, it will fail with a `ReferenceError`.
