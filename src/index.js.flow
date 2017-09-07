@@ -1,0 +1,19 @@
+// @flow
+
+// Gets a function's return type:
+type ReturnType = <R>((...args: any) => R) => R
+
+// The returned reducer's type:
+type BuiltReducer<M> = <A, P>(
+  state: $ObjMap<M, ReturnType> | void,
+  action: A,
+  peers: P
+) => $ObjMap<M, ReturnType>
+
+// Our actual function:
+export function buildReducer<M: {}, P> (
+  reducerMap: M,
+  filterPeers?: (peers: P) => {}
+): BuiltReducer<M> {
+  return () => ({})
+}

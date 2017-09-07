@@ -1,0 +1,50 @@
+{
+  "name": "redux-keto",
+  "version": "0.1.0",
+  "description": "A tool for building fat reducers",
+  "license": "MIT",
+  "author": "Airbitz, Inc.",
+  "contributors": [
+    "William Swanson <william@airbitz.co>"
+  ],
+  "files": [
+    "CHANGELOG.md",
+    "README.md",
+    "lib/*",
+    "package.json"
+  ],
+  "main": "lib/redux-keto.js",
+  "module": "lib/redux-keto.es.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Airbitz/redux-keto.git"
+  },
+  "scripts": {
+    "build": "rollup -c && cp src/index.js.flow lib/redux-keto.js.flow",
+    "build:test": "rollup -c rollup.config.test.js",
+    "format": "prettier --write '*.js' 'src/**/*.js' 'test/**/*.js' && eslint --fix '*.js' 'src/**/*.js' 'test/**/*.js'",
+    "lint": "eslint '*.js' 'src/**/*.js' 'test/**/*.js'",
+    "precommit": "npm run lint && npm run build",
+    "prepare": "npm run build",
+    "pretest": "npm run lint && npm run build:test",
+    "test": "mocha --require source-map-support/register build/tests.js"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-es2015-rollup": "^3.0.0",
+    "chai": "^4.1.2",
+    "eslint": "^4.6.1",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-node": "^5.1.1",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^3.0.1",
+    "husky": "^0.14.3",
+    "mocha": "^3.5.0",
+    "redux": "^3.7.2",
+    "rollup": "^0.49.2",
+    "rollup-plugin-babel": "^3.0.2",
+    "source-map-support": "^0.4.17"
+  }
+}
