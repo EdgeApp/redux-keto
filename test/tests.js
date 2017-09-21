@@ -9,9 +9,9 @@ describe('buildReducer', function () {
       return action.type === 'CHANGE_MAX_COUNT' ? action.payload : state
     }
 
-    function counter (state = 0, action, peers) {
+    function counter (state = 0, action, props) {
       return Math.min(
-        peers.maxCount,
+        props.peers.maxCount,
         action.type === 'INCREMENT' ? state + action.payload : state
       )
     }
@@ -35,10 +35,10 @@ describe('buildReducer', function () {
     expect(store.getState().counter).to.equal(5)
   })
 
-  it('updates the `unchanged` property', function () {
+  it('provides an `oldProps` property', function () {
     const log = []
-    function logger (state = 0, action, peers) {
-      log.push(peers.unchanged)
+    function logger (state = 0, action, props, oldProps) {
+      log.push(props.peers.dirtier === oldProps.peers.dirtier)
       return state
     }
 
@@ -67,12 +67,12 @@ describe('buildReducer', function () {
   })
 
   it('throws on circular references', function () {
-    function a (state, action, peers) {
-      return peers.b
+    function a (state, action, props) {
+      return props.peers.b
     }
 
-    function b (state, action, peers) {
-      return peers.a
+    function b (state, action, props) {
+      return props.peers.a
     }
 
     const rootReducer = buildReducer({ a, b })
@@ -84,8 +84,8 @@ describe('buildReducer', function () {
 
   it('copies parent props', function () {
     const log = []
-    function logger (state = 0, action, peers) {
-      log.push(`${peers.unchanged} ${peers.settings}`)
+    function logger (state = 0, action, props) {
+      log.push(`${props.peers.settings}`)
       return state
     }
 
@@ -94,13 +94,13 @@ describe('buildReducer', function () {
     }
 
     const rootReducer = buildReducer({
-      app: buildReducer({ logger }, ({ settings }) => ({ settings })),
+      app: buildReducer({ logger }),
       settings
     })
     const store = createStore(rootReducer)
     store.dispatch({ type: 'IRRELEVANT' })
     store.dispatch({ type: 'DIRTY' })
     store.dispatch({ type: 'IRRELEVANT' })
-    expect(log).to.deep.equal(['false 0', 'true 0', 'false 1', 'true 1'])
+    expect(log).to.deep.equal(['0', '0', '1', '1'])
   })
 })
