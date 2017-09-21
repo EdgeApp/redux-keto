@@ -2,13 +2,13 @@
 
 > A tool for building fat reducers
 
-Redux works best when the reducers contain most of the business logic. Unfortunately, it's hard to make this work in practice. One problem is that reducers can't talk to each other. This library provides an easy way to let one reducer's results influence another.
+The Redux architecture works best when the reducers contain as much business logic as possible. Doing this in practice is hard, though, since reducers can't pass values between each other.
 
-The redux-keto library implements a single function, `buildReducer`, which works a lot like Redux's built-in `combineReducers` function. Besides the normal `state` and `action` parameters, this function passes a third parameter, `peers`, to each of its children. Reducers can use `peers` to pass values between each other in a fully-reactive, auto-updating way.
+This library provide a way to build "fat reducers", which take an extra `props` argument in addition to the normal `state` and `action` arguments. Fat reducers use this extra parameter to pass values between each other in a fully-reactive, auto-updating way.
 
-This is useful in many situations, such as when an application's behavior depends on its settings. If the affected reducers can't access the settings state, they can't be adjust their behavior to match. This pushes the business logic into the components and middleware, which makes the system hard to understand. The `redux-keto` library encourages the opposite approach, pushing business logic back into the reducers where it belongs. Fatter reducers mean healthier systems (hence the [name](https://en.wikipedia.org/wiki/Low-carbohydrate_diet)).
+Fat reducers work seamlessly with normal reducers, so there are no big changes to the way Redux works. Just use fat reducers wherever they make sense.
 
-## Usage
+## Usage example
 
 Suppose an app has two pieces of state, a `counter` and a user-settable `maxCount`. The counter should never exceed `maxCount`, so it also needs update itself whenever `maxCount` changes.
 
@@ -23,9 +23,9 @@ function maxCount (state = 0, action) {
 The `counter` reducer is only a little more complicated, since it needs to consider the `maxCount` state:
 
 ```js
-function counter (state = 0, action, peers) {
+function counter (state = 0, action, props) {
   return Math.min(
-    peers.maxCount,
+    props.peers.maxCount,
     action.type === 'INCREMENT' ? state + action.payload : state
   )
 }
@@ -45,44 +45,111 @@ Everything is fully reactive, since the `peers` parameter reflects the *next* st
 
 ### Derived values
 
-To derive a value from some existing state, just create a reducer that ignores its `state` and `action` parameters:
+To derive a value from some existing state, just create a fat reducer that ignores its `state` and `action` parameters:
 
 ```js
-function countIsEven (state, action, peers) {
-  return peers.counter % 2 === 0
+function countIsEven (state, action, props) {
+  return props.peers.counter % 2 === 0
 }
 ```
 
 Now `countIsEven` will stay in sync with the `counter` no matter what happens. Because this is just a normal reducer, it will also appear in `peers` so other reducers can access it.
 
-To optimize cases where the peers haven't changed, reducers can check the `peers.unchanged` flag:
+To optimize cases where the props haven't changed, fat reducers receive a copy of their previous props, which they can check for differences:
 
 ```js
-function countIsOdd (state, action, peers) {
-  if (peers.unchanged) return state
+function countIsOdd (state, action, props, oldProps) {
+  if (props.peers.count === oldProps.peers.count) return state
 
-  return peers.counter % 2 !== 0
+  return props.peers.counter % 2 !== 0
 }
 ```
 
-Now the `countIsOdd` calculation will only run when the counter actually changes. Reading the `unchanged` flag triggers extra book-keeping, so this optimization is not worthwhile if checking for changes would take longer than the calculation being avoided.
+Now the `countIsOdd` calculation will only run when the counter actually changes.
 
-### Accessing a Parent's Peers
+### Nesting fat reducers
 
-When one `buildReducer` is nested inside another, it is sometimes useful to give the inner reducers access to the outer reducer's peers. To accomplish this, the `buildReducer` function accepts a function that maps its own peers into its children's peers.
-
-In this example, the reducers inside `mainApp` not only have access to each other, but also to a `peers.settings` value copied in from the outside:
+When one `buildReducer` is nested inside another, the inner ones will simply pass the `props` through unchanged, including `peers`. This can move things around in surprising ways:
 
 ```js
-function filterPeers (peers) {
-  return { settings: peers.settings }
-}
-
 const rootReducer = buildReducer({
-  mainApp:  buildReducer({ /* reducers... */ }, filterPeers),
-  settings: buildReducer({ /* reducers... */ })
+  counterState: buildReducer({ maxCount, counter }),
+  otherState
 })
 ```
+
+Adding the extra `buildReducer` level shifts the `maxCount` state from `props.peers.maxCount` to `props.peers.counterState.maxCount`. This will break the `counter` reducer, which is expecting to find `maxCount` in the old location.
+
+This is actually a good thing, since the `peers` parameter matches what `store.getState()` would return (assuming `rootReducer` really is the top-most reducer in the Redux store). This makes accessing global state convenient and predictable for all reducers in the system, no matter where they are located.
+
+### Custom props
+
+In the previous example, moving the counter reducer broke some things. To get the best of both worlds - predictable access to both global and local state - use the `wrapReducer` function. This function provides a way to adjust the `props` going into a reducer:
+
+```js
+import { buildReducer, wrapReducer } from 'redux-keto'
+
+counterState = wrapReducer(
+  buildReducer({ maxCount, counter }),
+  props => ({ state: props.peers })
+}
+
+const rootReducer = buildReducer({ counterState, otherState })
+```
+
+In this example, `wrapReducer` renames the global `props.peers` into `props.state`. Now the `counter` reducer can refer to gobal state as `props.state`, and `props.peers` goes back to being local peers again.
+
+### Reducer lists
+
+Applications often manage lists of things. For example, a chat platform might manage multiple conversations, each with its own state. To handle cases like this, `redux-keto` provides a `repeatReducer` function:
+
+```js
+import { repeatReducer } from 'redux-keto'
+
+const chatsById = repeatReducer(
+  chatReducer,
+
+  // The list of ids:
+  props => props.peers.activeChatIds,
+
+  // Filter the props:
+  (props, id) => ({ chatId: id }),
+
+  // Filter the actions:
+  (action, id) => {
+    if (action.payload.chatId === id) return action
+  }
+)
+```
+
+The first `repeatReducer` parameter is the reducer to replicate, and the second parameter returns a list of ids. There will be one `chatReducer` for each id.
+
+The final two parameters are the props filter and action filter. In this example, the props filter passes the chat id in as a prop, while the action filter esures that the individual reducers will only run if their `id` matches the `id` in the action's payload.
+
+### Modular reducers
+
+Like `repeatReducer`, the `wrapReducer` function also accepts an action filter. This can be useful for creating stand-alone sub-stores that still talk to the rest of the app:
+
+```js
+const subsystem = wrapReducer(
+  subsystemReducer,
+
+  // Filter the props:
+  props => ({ settings: props.peers.subsystemSettings }),
+
+  // Filter the actions:
+  action => {
+    if (/^SUBSYSTEM_/.test(action.type)) {
+      return action
+    }
+    if (action.type === 'LOGIN') {
+      return { type: 'SUBSYSTEM_INIT'}
+    }
+  }
+)
+```
+
+In this example, the `subsystemReducer` will only receive actions that start with `SUBSYSTEM_`. It will also recieve a `SUBSYSTEM_INIT` action when the outer system receives a `LOGIN` action.
 
 ### Circular Dependencies
 
