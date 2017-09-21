@@ -1,9 +1,9 @@
-import babel from 'rollup-plugin-babel'
+import buble from 'rollup-plugin-buble'
 import packageJson from './package.json'
 
-const babelOpts = {
-  presets: ['es2015-rollup'],
-  plugins: ['transform-object-rest-spread']
+const bubleOpts = {
+  transforms: { dangerousForOf: true },
+  objectAssign: 'Object.assign'
 }
 
 export default {
@@ -12,6 +12,6 @@ export default {
     { file: packageJson.main, format: 'cjs' },
     { file: packageJson.module, format: 'es' }
   ],
-  plugins: [babel(babelOpts)],
+  plugins: [buble(bubleOpts)],
   sourcemap: true
 }
