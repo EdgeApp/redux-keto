@@ -1,19 +1,42 @@
 // @flow
 
+// Our basic type:
+export type FatReducer<S, A, P> = (
+  state: S | void,
+  action: A,
+  props: P,
+  oldProps: P
+) => S
+
 // Gets a function's return type:
 type ReturnType = <R>((...args: any) => R) => R
 
 // The returned reducer's type:
-type BuiltReducer<M> = <A, P>(
+type BuiltReducer<M> = (
   state: $ObjMap<M, ReturnType> | void,
-  action: A,
-  peers: P
+  action: any,
+  props: any,
+  oldProps: any
 ) => $ObjMap<M, ReturnType>
 
-// Our actual function:
-export function buildReducer<M: {}, P> (
-  reducerMap: M,
-  filterPeers?: (peers: P) => {}
-): BuiltReducer<M> {
-  return () => ({})
+// Our actual functions:
+export function buildReducer<M: {}> (reducerMap: M): BuiltReducer<M> {
+  return () => ({}: any)
+}
+
+export function wrapReducer<S, A, P, Q> (
+  reducer: FatReducer<S, A, Q>,
+  filterProps?: (props: P) => Q,
+  filterAction?: (action: A) => A
+): FatReducer<S, A, P> {
+  return () => ({}: any)
+}
+
+export function repeatReducer<S, A, P, Q> (
+  reducer: FatReducer<S, A, Q>,
+  listIds: (props: P) => Array<string>,
+  filterProps?: (props: P, id: string) => Q,
+  filterAction?: (action: A, id: string) => A
+): FatReducer<{ [key: string]: S }, A, P> {
+  return () => ({}: any)
 }
