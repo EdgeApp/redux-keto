@@ -24,7 +24,7 @@ export function buildReducer<M: {}> (reducerMap: M): BuiltReducer<M> {
   return () => ({}: any)
 }
 
-export function wrapReducer<S, A, P, Q> (
+export function filterReducer<S, A, P, Q> (
   reducer: FatReducer<S, A, Q>,
   filterProps?: (props: P) => Q,
   filterAction?: (action: A) => A

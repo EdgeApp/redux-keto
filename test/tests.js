@@ -1,4 +1,4 @@
-import { buildReducer, mapReducer, wrapReducer } from '../src/index.js'
+import { buildReducer, filterReducer, mapReducer } from '../src/index.js'
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 import { createStore } from 'redux'
@@ -105,7 +105,7 @@ describe('buildReducer', function () {
   })
 })
 
-describe('wrapReducer', function () {
+describe('filterReducer', function () {
   it('basic functionality', function () {
     const log = []
     function logger (state = 0, action, props) {
@@ -119,7 +119,7 @@ describe('wrapReducer', function () {
 
     const rootReducer = buildReducer({
       app: buildReducer({
-        logger: wrapReducer(
+        logger: filterReducer(
           logger,
           props => ({ settings: props.peers.settings }),
           action => action.type !== 'IGNORED'

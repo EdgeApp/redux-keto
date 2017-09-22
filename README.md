@@ -84,12 +84,12 @@ This is actually a good thing, since the `peers` parameter matches what `store.g
 
 ### Custom props
 
-In the previous example, moving the counter reducer broke some things. To get the best of both worlds - predictable access to both global and local state - use the `wrapReducer` function. This function provides a way to adjust the `props` going into a reducer:
+In the previous example, moving the counter reducer broke some things. To get the best of both worlds - predictable access to both global and local state - use the `filterReducer` function. This function provides a way to adjust the `props` going into a reducer:
 
 ```js
-import { buildReducer, wrapReducer } from 'redux-keto'
+import { buildReducer, filterReducer } from 'redux-keto'
 
-counterState = wrapReducer(
+counterState = filterReducer(
   buildReducer({ maxCount, counter }),
   props => ({ state: props.peers })
 }
@@ -97,7 +97,7 @@ counterState = wrapReducer(
 const rootReducer = buildReducer({ counterState, otherState })
 ```
 
-In this example, `wrapReducer` renames the global `props.peers` into `props.state`. Now the `counter` reducer can refer to gobal state as `props.state`, and `props.peers` goes back to being local peers again.
+In this example, `filterReducer` renames the global `props.peers` into `props.state`. Now the `counter` reducer can refer to gobal state as `props.state`, and `props.peers` goes back to being local peers again.
 
 ### Reducer lists
 
@@ -128,10 +128,10 @@ The final two parameters are the props filter and action filter. In this example
 
 ### Modular reducers
 
-Like `mapReducer`, the `wrapReducer` function also accepts an action filter. This can be useful for creating stand-alone sub-stores that still talk to the rest of the app:
+Like `mapReducer`, the `filterReducer` function also accepts an action filter. This can be useful for creating stand-alone sub-stores that still talk to the rest of the app:
 
 ```js
-const subsystem = wrapReducer(
+const subsystem = filterReducer(
   subsystemReducer,
 
   // Filter the props:

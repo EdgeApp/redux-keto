@@ -11,7 +11,7 @@ function filterActionsDefault (action) {
 /**
  * Filters the props and actions going into a fat reducer.
  */
-export function wrapReducer (
+export function filterReducer (
   reducer,
   filterProps = filterPropsDefault,
   filterAction = filterActionsDefault
