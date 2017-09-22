@@ -15,7 +15,7 @@ export function wrapReducer<S, A, P, Ai, Pi> (
   filterAction?: (action: A) => Ai
 ): FatReducer<S, A, P>
 
-export function repeatReducer<S, A, P, Ai, Pi> (
+export function mapReducer<S, A, P, Ai, Pi> (
   reducer: FatReducer<S, Ai, Pi>,
   listIds: (props: P) => Array<string>,
   filterProps?: (props: P, id: string) => Pi,

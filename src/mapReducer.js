@@ -9,9 +9,10 @@ function filterActionsDefault (action, id) {
 }
 
 /**
- * Replicates a reducer, allowing each instance to manage a single list item.
+ * Applies a reducer to each item of a list.
+ * Each reducer manages its own state slice on behalf of the list item.
  */
-export function repeatReducer (
+export function mapReducer (
   reducer,
   listIds,
   filterProps = filterPropsDefault,

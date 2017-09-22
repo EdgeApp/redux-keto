@@ -1,4 +1,4 @@
-import { buildReducer, repeatReducer, wrapReducer } from '../src/index.js'
+import { buildReducer, mapReducer, wrapReducer } from '../src/index.js'
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 import { createStore } from 'redux'
@@ -137,7 +137,7 @@ describe('wrapReducer', function () {
   })
 })
 
-describe('repeatReducer', function () {
+describe('mapReducer', function () {
   it('basic functionality', function () {
     const log = []
     function childReducer (state = 0, action, props) {
@@ -150,7 +150,7 @@ describe('repeatReducer', function () {
     }
 
     const rootReducer = buildReducer({
-      byId: repeatReducer(
+      byId: mapReducer(
         childReducer,
         props => props.peers.list,
         (props, id) => ({ id }),

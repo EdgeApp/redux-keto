@@ -101,12 +101,12 @@ In this example, `wrapReducer` renames the global `props.peers` into `props.stat
 
 ### Reducer lists
 
-Applications often manage lists of things. For example, a chat platform might manage multiple conversations, each with its own state. To handle cases like this, `redux-keto` provides a `repeatReducer` function:
+Applications often manage lists of things. For example, a chat platform might manage multiple conversations, each with its own state. To handle cases like this, `redux-keto` provides a `mapReducer` function:
 
 ```js
-import { repeatReducer } from 'redux-keto'
+import { mapReducer } from 'redux-keto'
 
-const chatsById = repeatReducer(
+const chatsById = mapReducer(
   chatReducer,
 
   // The list of ids:
@@ -122,13 +122,13 @@ const chatsById = repeatReducer(
 )
 ```
 
-The first `repeatReducer` parameter is the reducer to replicate, and the second parameter returns a list of ids. There will be one `chatReducer` for each id.
+The first `mapReducer` parameter is the reducer to replicate, and the second parameter returns a list of ids. There will be one `chatReducer` for each id.
 
 The final two parameters are the props filter and action filter. In this example, the props filter passes the chat id in as a prop, while the action filter esures that the individual reducers will only run if their `id` matches the `id` in the action's payload.
 
 ### Modular reducers
 
-Like `repeatReducer`, the `wrapReducer` function also accepts an action filter. This can be useful for creating stand-alone sub-stores that still talk to the rest of the app:
+Like `mapReducer`, the `wrapReducer` function also accepts an action filter. This can be useful for creating stand-alone sub-stores that still talk to the rest of the app:
 
 ```js
 const subsystem = wrapReducer(

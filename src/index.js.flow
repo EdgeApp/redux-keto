@@ -32,7 +32,7 @@ export function wrapReducer<S, A, P, Q> (
   return () => ({}: any)
 }
 
-export function repeatReducer<S, A, P, Q> (
+export function mapReducer<S, A, P, Q> (
   reducer: FatReducer<S, A, Q>,
   listIds: (props: P) => Array<string>,
   filterProps?: (props: P, id: string) => Q,

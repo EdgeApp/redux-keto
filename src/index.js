@@ -1,3 +1,3 @@
 export { buildReducer } from './buildReducer.js'
-export { repeatReducer } from './repeatReducer.js'
+export { mapReducer } from './mapReducer.js'
 export { wrapReducer } from './wrapReducer.js'
