@@ -67,37 +67,28 @@ function countIsOdd (state, action, props, oldProps) {
 
 Now the `countIsOdd` calculation will only run when the counter actually changes.
 
-### Nesting fat reducers
+### Nested fat reducers
 
-When one `buildReducer` is nested inside another, the inner ones will simply pass the `props` through unchanged, including `peers`. This can move things around in surprising ways:
-
-```js
-const rootReducer = buildReducer({
-  counterState: buildReducer({ maxCount, counter }),
-  otherState
-})
-```
-
-Adding the extra `buildReducer` level shifts the `maxCount` state from `props.peers.maxCount` to `props.peers.counterState.maxCount`. This will break the `counter` reducer, which is expecting to find `maxCount` in the old location.
-
-This is actually a good thing, since the `peers` parameter matches what `store.getState()` would return (assuming `rootReducer` really is the top-most reducer in the Redux store). This makes accessing global state convenient and predictable for all reducers in the system, no matter where they are located.
+If `buildReducer` recieves a `props.peers` from the outside, it will simply pass it along to its children unchanged. This means that the top-most `buildReducer` acts as the root of the `peers` tree. If the top-most `buildReducer` also happens to be the top-most reducer in the store, then `peers` will have the same shape as the Redux `getState()`.
 
 ### Custom props
 
-In the previous example, moving the counter reducer broke some things. To get the best of both worlds - predictable access to both global and local state - use the `filterReducer` function. This function provides a way to adjust the `props` going into a reducer:
+To customize the props going into a reducer, use the `filterReducer` function:
 
 ```js
 import { buildReducer, filterReducer } from 'redux-keto'
 
 counterState = filterReducer(
   buildReducer({ maxCount, counter }),
-  props => ({ state: props.peers })
+  props => ({ otherState: props.peers.otherState })
 }
 
 const rootReducer = buildReducer({ counterState, otherState })
 ```
 
-In this example, `filterReducer` renames the global `props.peers` into `props.state`. Now the `counter` reducer can refer to gobal state as `props.state`, and `props.peers` goes back to being local peers again.
+The second parameter to `filterReducer` is a function that translates the outer props into props for the inner reducer.
+
+In this example, `filterReducer` renames the global `props.peers.otherState` into `props.otherState`. Because the inner props don't include a `peers` member, the inner `buildReducer` will add one. This means that the `counter` reducer can continue to refer to `props.peers.maxCount` as before, no matter where it is located in the global state tree.
 
 ### Reducer lists
 
@@ -124,11 +115,11 @@ const chatsById = mapReducer(
 
 The first `mapReducer` parameter is the reducer to replicate, and the second parameter returns a list of ids. There will be one `chatReducer` for each id.
 
-The final two parameters are the props filter and action filter. In this example, the props filter passes the chat id in as a prop, while the action filter esures that the individual reducers will only run if their `id` matches the `id` in the action's payload.
+The final two optional parameters are the props filter and action filter. In this example, the props filter passes the chat id in as a prop, while the action filter ensures that the individual reducers will only run if their `id` matches the `id` in the action's payload.
 
-### Modular reducers
+### Isolating reducers
 
-Like `mapReducer`, the `filterReducer` function also accepts an action filter. This can be useful for creating stand-alone sub-stores that still talk to the rest of the app:
+Like `mapReducer`, the `filterReducer` function also accepts an optional action filter. This can be useful for creating stand-alone sub-stores that still talk to the rest of the app:
 
 ```js
 const subsystem = filterReducer(
@@ -153,8 +144,8 @@ In this example, the `subsystemReducer` will only receive actions that start wit
 
 ### Circular Dependencies
 
-The `peers` parameter creates the illusion of time travel. It reflects the current action's outcome before all the reducers have even finished running.
+The `peers` property creates the illusion of time travel. It reflects the current action's outcome before all the reducers have even finished running.
 
-The `peers` parameter achieves this magic using memoized lazy evaluation. The `peers.maxCount` property in the orignal example is actually a getter function which invokes the `maxCount` reducer to calculate the new value on the spot (if `maxCount` hasn't already run).
+It achieves this magic using memoized lazy evaluation. The `peers.maxCount` property in the orignal example is actually a getter that calls the `maxCount` reducer on-the-spot to find the next state (unless `maxCount` has already run).
 
-This means that circular dependencies will not work. If a reducer depends on its own output, even indirectly, it will fail with a `ReferenceError`.
+This means that circular dependencies will not work. If a reducer tries to read its own output, even indirectly, it will fail with a `ReferenceError`.
