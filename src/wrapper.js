@@ -40,6 +40,7 @@ export function makeWrapperProto (keys, makeReducer) {
           Object.defineProperty(this, key, {
             configurable: true,
             enumerable: true,
+            writable: false,
             value: out
           })
           return out
@@ -61,6 +62,7 @@ export function makeWrapper (wrapperProto, state, action, props, oldProps) {
 
   const wrapper = Object.create(wrapperProto)
   Object.defineProperty(wrapper, wrapperMagic, {
+    configurable: true,
     enumerable: false,
     writable: false,
     value: {
@@ -77,7 +79,7 @@ export function makeWrapper (wrapperProto, state, action, props, oldProps) {
 
 /**
  * Flattens a lazy key-value wrapper into a plain-old object
- * with the currency state as its properties.
+ * with the current state as its properties.
  */
 export function flattenWrapper (state = {}, wrapper) {
   // If it's not a wrapper, we are done:
@@ -88,7 +90,9 @@ export function flattenWrapper (state = {}, wrapper) {
   let unchanged = Object.keys(state).length === keys.length
   for (const key of keys) {
     Object.defineProperty(wrapper, key, {
+      configurable: false,
       enumerable: true,
+      writable: false,
       value: flattenWrapper(state[key], wrapper[key])
     })
     if (wrapper[key] !== state[key]) {
@@ -96,5 +100,9 @@ export function flattenWrapper (state = {}, wrapper) {
     }
   }
 
-  return unchanged ? state : wrapper
+  // If nothing changed, just return the previous state:
+  if (unchanged) return state
+
+  delete wrapper[wrapperMagic]
+  return wrapper
 }

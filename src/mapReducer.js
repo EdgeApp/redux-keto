@@ -8,6 +8,8 @@ function filterActionsDefault (action, id) {
   return action
 }
 
+const defaultState = {}
+
 /**
  * Applies a reducer to each item of a list.
  * Each reducer manages its own state slice on behalf of the list item.
@@ -30,15 +32,15 @@ export function mapReducer (
     }
   }
 
-  return function listReducer (state = {}, action, props, oldProps) {
+  return function listReducer (state = defaultState, action, props, oldProps) {
     const ids = listIds(props)
     const oldIds = listIds(oldProps)
 
     // Try to recycle our wrapper prototype, if possible:
-    let wrapperProto = Object.getPrototypeOf(state)
-    if (ids !== oldIds || wrapperProto === Object) {
-      wrapperProto = makeWrapperProto(ids, id => wrapChild(id))
-    }
+    const wrapperProto =
+      state === defaultState || ids !== oldIds
+        ? makeWrapperProto(ids, id => wrapChild(id))
+        : Object.getPrototypeOf(state)
 
     const wrapper = makeWrapper(wrapperProto, state, action, props, oldProps)
 
