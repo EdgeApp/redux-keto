@@ -1,6 +1,6 @@
 {
   "name": "redux-keto",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A tool for building fat reducers",
   "license": "MIT",
   "author": "Airbitz, Inc.",

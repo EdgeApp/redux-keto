@@ -1,5 +1,10 @@
 # redux-keto
 
+## 0.2.1
+
+* Reducers can now have a `defaultState` property, which provides the initial state. This allows `oldProps.peers` to always have a meaningful structure.
+* Reducers now receive a proper initial state, which is either `undefined` or the reducer's `defaultState` property. Before, many reducers would receive `{}` as an inital state, which was a bug.
+
 ## 0.2.0
 
 Breaking changes:
