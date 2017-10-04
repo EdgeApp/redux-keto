@@ -42,11 +42,10 @@ export function mapReducer (
 
   function mapReducer (state = defaultState, action, props, oldProps) {
     const ids = listIds(props)
-    const oldIds = listIds(oldProps)
 
     // Try to recycle our wrapper prototype, if possible:
     const wrapperProto =
-      state === defaultState || ids !== oldIds
+      state === defaultState || ids !== listIds(oldProps)
         ? makeWrapperProto(ids, id => wrapChild(id))
         : Object.getPrototypeOf(state)
 
