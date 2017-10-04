@@ -16,7 +16,9 @@ export function filterReducer (
   filterProps = filterPropsDefault,
   filterAction = filterActionsDefault
 ) {
-  return function wrappedReducer (state, action, props, oldProps) {
+  const defaultState = reducer.defaultState
+
+  function filteredReducer (state = defaultState, action, props, oldProps) {
     const innerAction = filterAction(action)
     const innerProps = filterProps(props)
     const innerOldProps = filterProps(oldProps)
@@ -28,4 +30,7 @@ export function filterReducer (
     // If we are the topmost fat reducer, flatten the wrappers:
     return props == null ? flattenWrapper(state, wrapper) : wrapper
   }
+  filteredReducer.defaultState = defaultState
+
+  return filteredReducer
 }

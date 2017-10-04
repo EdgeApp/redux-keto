@@ -21,21 +21,26 @@ export function mapReducer (
   filterAction = filterActionsDefault
 ) {
   function wrapChild (id) {
-    return function wrappedReducer (state, action, props, oldProps) {
+    return function itemReducer (
+      state = reducer.defaultState,
+      action,
+      props,
+      oldProps
+    ) {
       let innerAction = filterAction(action, id)
       const innerProps = filterProps(props, id)
       const innerOldProps = filterProps(oldProps, id)
 
       if (!innerAction) {
         if (state !== void 0) return state
-        innerAction = { type: 'REDUX-KETO-PROPS-CHANGE' }
+        innerAction = { type: 'redux-keto props change' }
       }
 
       return reducer(state, innerAction, innerProps, innerOldProps)
     }
   }
 
-  return function listReducer (state = defaultState, action, props, oldProps) {
+  function mapReducer (state = defaultState, action, props, oldProps) {
     const ids = listIds(props)
     const oldIds = listIds(oldProps)
 
@@ -50,4 +55,7 @@ export function mapReducer (
     // If we are the topmost fat reducer, flatten the wrappers:
     return props == null ? flattenWrapper(state, wrapper) : wrapper
   }
+  mapReducer.defaultState = defaultState
+
+  return mapReducer
 }

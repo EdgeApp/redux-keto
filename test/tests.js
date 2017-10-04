@@ -182,3 +182,57 @@ describe('mapReducer', function () {
     expect(log).to.deep.equal(['0', '1', '2'])
   })
 })
+
+describe('defaultState', function () {
+  // A reducer with its own defaultState:
+  const defaultState = new Date()
+  function sibling (state) {
+    expect(state).to.equal(defaultState)
+    return state
+  }
+  sibling.defaultState = defaultState
+
+  it('passes through filterReducer', function () {
+    function innerReducer (state = defaultState, action, props, oldProps) {
+      expect(oldProps).has.property('peers')
+      expect(oldProps.peers).has.property('level1')
+      expect(oldProps.peers.level1).has.property('level2')
+      expect(oldProps.peers.level1).has.property('sibling', defaultState)
+
+      expect(props.peers.level1.sibling).to.equal(defaultState)
+      // Accessing props.peers.level1.level2 would be circular.
+
+      return state
+    }
+
+    const rootReducer = buildReducer({
+      level1: filterReducer(
+        buildReducer({ level2: innerReducer, sibling }),
+        props => props
+      )
+    })
+    rootReducer(void 0, { type: 'INIT' })
+  })
+
+  it('passes through mapReducer', function () {
+    function innerReducer (state = defaultState, action, props, oldProps) {
+      expect(oldProps).has.property('peers')
+      expect(oldProps.peers).has.property('level1')
+      expect(oldProps.peers.level1).to.deep.equal({}) // No ids yet
+
+      expect(props.peers.level1.id.sibling).to.equal(defaultState)
+      // Accessing props.peers.level1.id.level2 would be circular.
+
+      return state
+    }
+
+    const rootReducer = buildReducer({
+      level1: mapReducer(
+        buildReducer({ level2: innerReducer, sibling }),
+        props => ['id'],
+        props => props
+      )
+    })
+    rootReducer(void 0, { type: 'INIT' })
+  })
+})

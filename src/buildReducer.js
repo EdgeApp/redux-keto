@@ -18,10 +18,19 @@ export function buildReducer (reducerMap) {
   // Build the wrapper:
   const wrapperProto = makeWrapperProto(keys, key => reducerMap[key])
 
-  return function builtReducer (state = {}, action, props, oldProps) {
+  // Build the default state:
+  const defaultState = {}
+  for (const key of keys) {
+    defaultState[key] = reducerMap[key].defaultState
+  }
+
+  function builtReducer (state = defaultState, action, props, oldProps) {
     const wrapper = makeWrapper(wrapperProto, state, action, props, oldProps)
 
     // If we are the topmost fat reducer, flatten the wrappers:
     return props == null ? flattenWrapper(state, wrapper) : wrapper
   }
+  builtReducer.defaultState = defaultState
+
+  return builtReducer
 }

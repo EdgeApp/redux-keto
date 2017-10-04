@@ -142,6 +142,10 @@ const subsystem = filterReducer(
 
 In this example, the `subsystemReducer` will only receive actions that start with `SUBSYSTEM_`. It will also recieve a `SUBSYSTEM_INIT` action when the outer system receives a `LOGIN` action.
 
+### Default state
+
+The first time a reducer runs, it has no pre-existing state. On the other hand, allowing `oldProps.peers` to just be `undefined` would make writing reducers much more difficult. To solve this, `redux-keto` looks for a property called `defaultState` on each reducer function. If it finds one, it uses that as the initial state rather than `undefined`. This allows `oldProps.peers` to have a useful tree structure, even on the first run.
+
 ### Circular Dependencies
 
 The `peers` property creates the illusion of time travel. It reflects the current action's outcome before all the reducers have even finished running.
