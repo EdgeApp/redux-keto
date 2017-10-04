@@ -21,12 +21,15 @@ export function mapReducer (
   filterAction = filterActionsDefault
 ) {
   function wrapChild (id) {
-    return function wrappedReducer (state = {}, action, props, oldProps) {
-      const innerAction = filterAction(action, id)
+    return function wrappedReducer (state, action, props, oldProps) {
+      let innerAction = filterAction(action, id)
       const innerProps = filterProps(props, id)
       const innerOldProps = filterProps(oldProps, id)
 
-      if (!innerAction) return state
+      if (!innerAction) {
+        if (state !== void 0) return state
+        innerAction = { type: 'REDUX-KETO-PROPS-CHANGE' }
+      }
 
       return reducer(state, innerAction, innerProps, innerOldProps)
     }

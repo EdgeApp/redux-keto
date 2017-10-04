@@ -139,7 +139,7 @@ describe('filterReducer', function () {
 
 describe('mapReducer', function () {
   it('basic functionality', function () {
-    const log = []
+    let log = []
     function childReducer (state = 0, action, props) {
       log.push(`${props.id}`)
       return state
@@ -159,16 +159,26 @@ describe('mapReducer', function () {
       list
     })
     const store = createStore(rootReducer)
+
     store.dispatch({ type: 'INSERT' })
     store.dispatch({ type: 'PING', id: 0 })
     store.dispatch({ type: 'PING', id: 1 })
     store.dispatch({ type: 'PING', id: 2 })
+    expect(log).to.deep.equal(['0', '0'])
+    log = []
+
     store.dispatch({ type: 'INSERT' })
     store.dispatch({ type: 'INSERT' })
+    expect(log).to.deep.equal(['1', '2'])
+    log = []
+
     store.dispatch({ type: 'PING', id: 0 })
     store.dispatch({ type: 'PING', id: 1 })
     store.dispatch({ type: 'PING', id: 2 })
+    expect(log).to.deep.equal(['0', '1', '2'])
+    log = []
+
     store.dispatch({ type: 'ALL' })
-    expect(log).to.deep.equal(['0', '0', '1', '2', '0', '1', '2'])
+    expect(log).to.deep.equal(['0', '1', '2'])
   })
 })

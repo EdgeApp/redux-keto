@@ -16,7 +16,7 @@ export function filterReducer (
   filterProps = filterPropsDefault,
   filterAction = filterActionsDefault
 ) {
-  return function wrappedReducer (state = {}, action, props, oldProps) {
+  return function wrappedReducer (state, action, props, oldProps) {
     const innerAction = filterAction(action)
     const innerProps = filterProps(props)
     const innerOldProps = filterProps(oldProps)
