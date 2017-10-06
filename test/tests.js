@@ -181,6 +181,23 @@ describe('mapReducer', function () {
     store.dispatch({ type: 'ALL' })
     expect(log).to.deep.equal([0, 1, 2])
   })
+
+  it('merges duplicate keys', function () {
+    const log = []
+    function childReducer (state = 0, action, props) {
+      log.push(props.id)
+      return props.id
+    }
+
+    const rootReducer = mapReducer(
+      childReducer,
+      () => [0, 0, 1, 0, 2, 1],
+      (props, id) => ({ id })
+    )
+    const store = createStore(rootReducer)
+    expect(log).to.deep.equal([0, 1, 2])
+    expect(store.getState()).to.deep.equal({ '0': 0, '1': 1, '2': 2 })
+  })
 })
 
 describe('defaultState', function () {

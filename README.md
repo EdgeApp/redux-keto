@@ -113,7 +113,7 @@ const chatsById = mapReducer(
 )
 ```
 
-The first `mapReducer` parameter is the reducer to replicate, and the second parameter returns a list of ids. There will be one `chatReducer` for each id.
+The first `mapReducer` parameter is the reducer to replicate, and the second parameter returns a list of ids. There will be one `chatReducer` for each unique id (duplicates are ignored).
 
 The final two optional parameters are the props filter and action filter. In this example, the props filter passes the chat id in as a prop, while the action filter ensures that the individual reducers will only run if their `id` matches the `id` in the action's payload.
 
