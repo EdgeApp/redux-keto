@@ -1,4 +1,9 @@
-import { buildReducer, filterReducer, mapReducer } from '../src/index.js'
+import {
+  buildReducer,
+  filterReducer,
+  mapReducer,
+  memoizeReducer
+} from '../src/index.js'
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 import { createStore } from 'redux'
@@ -197,6 +202,64 @@ describe('mapReducer', function () {
     const store = createStore(rootReducer)
     expect(log).to.deep.equal([0, 1, 2])
     expect(store.getState()).to.deep.equal({ '0': 0, '1': 1, '2': 2 })
+  })
+})
+
+describe('memoizeReducer', function () {
+  it('readme example', function () {
+    const log = []
+    function counter (state = 0, action) {
+      return action.type === 'INCREMENT' ? state + 1 : state
+    }
+
+    const isOdd = memoizeReducer(
+      props => props.peers.counter,
+      counter => {
+        log.push(counter)
+        return counter % 2 === 1
+      }
+    )
+
+    const store = createStore(buildReducer({ counter, isOdd }))
+    expect(store.getState().isOdd).to.equal(false)
+    store.dispatch({ type: 'INCREMENT' })
+    store.dispatch({ type: 'IGNORED' })
+    expect(store.getState().isOdd).to.equal(true)
+    store.dispatch({ type: 'INCREMENT' })
+    store.dispatch({ type: 'IGNORED' })
+    expect(store.getState().isOdd).to.equal(false)
+
+    expect(log).to.deep.equal([0, 1, 2])
+  })
+
+  it('multiple arguments', function () {
+    const log = []
+    function counter1 (state = 0, action) {
+      return action.type === 'INCREMENT1' ? state + 1 : state
+    }
+    function counter2 (state = 0, action) {
+      return action.type === 'INCREMENT2' ? state + 1 : state
+    }
+
+    const areEqual = memoizeReducer(
+      props => props.peers.counter1,
+      props => props.peers.counter2,
+      (counter1, counter2) => {
+        log.push([counter1, counter2])
+        return counter1 === counter2
+      }
+    )
+
+    const store = createStore(buildReducer({ counter1, counter2, areEqual }))
+    expect(store.getState().areEqual).to.equal(true)
+    store.dispatch({ type: 'INCREMENT1' })
+    store.dispatch({ type: 'IGNORED' })
+    expect(store.getState().areEqual).to.equal(false)
+    store.dispatch({ type: 'INCREMENT2' })
+    store.dispatch({ type: 'IGNORED' })
+    expect(store.getState().areEqual).to.equal(true)
+
+    expect(log).to.deep.equal([[0, 0], [1, 0], [1, 1]])
   })
 })
 

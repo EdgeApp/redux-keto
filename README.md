@@ -67,6 +67,17 @@ function countIsOdd (state, action, props, oldProps) {
 
 Now the `countIsOdd` calculation will only run when the counter actually changes.
 
+To automate this, use the `memoizeReducer` function. This function works a lot like the [reselect](https://github.com/reactjs/reselect) library, but for reducers:
+
+```js
+const isOdd = memoizeReducer(
+  props => props.peers.counter,
+  counter => counter % 2 === 1
+)
+```
+
+The last parameter to `memoizeReducer` is the actual calculation. All the previous parameters are functions that grab items out of the props. If all the items are the same (`===`), `memoizeReducer` just returns the previous state. Otherwise, `memoizeReducer` runs the calculation on the items.
+
 ### Nested fat reducers
 
 If `buildReducer` recieves a `props.peers` from the outside, it will simply pass it along to its children unchanged. This means that the top-most `buildReducer` acts as the root of the `peers` tree. If the top-most `buildReducer` also happens to be the top-most reducer in the store, then `peers` will have the same shape as the Redux `getState()`.
