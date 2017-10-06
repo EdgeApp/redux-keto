@@ -85,7 +85,7 @@ describe('buildReducer', function () {
   it('copies parent props', function () {
     const log = []
     function logger (state = 0, action, props) {
-      log.push(`${props.peers.settings}`)
+      log.push(props.peers.settings)
       return state
     }
 
@@ -101,7 +101,7 @@ describe('buildReducer', function () {
     store.dispatch({ type: 'IRRELEVANT' })
     store.dispatch({ type: 'DIRTY' })
     store.dispatch({ type: 'IRRELEVANT' })
-    expect(log).to.deep.equal(['0', '0', '1', '1'])
+    expect(log).to.deep.equal([0, 0, 1, 1])
   })
 })
 
@@ -109,7 +109,7 @@ describe('filterReducer', function () {
   it('basic functionality', function () {
     const log = []
     function logger (state = 0, action, props) {
-      log.push(`${props.settings}`)
+      log.push(props.settings)
       return state
     }
 
@@ -133,7 +133,7 @@ describe('filterReducer', function () {
     store.dispatch({ type: 'DIRTY' })
     store.dispatch({ type: 'IGNORED' })
     store.dispatch({ type: 'IRRELEVANT' })
-    expect(log).to.deep.equal(['0', '0', '1', '1'])
+    expect(log).to.deep.equal([0, 0, 1, 1])
   })
 })
 
@@ -141,7 +141,7 @@ describe('mapReducer', function () {
   it('basic functionality', function () {
     let log = []
     function childReducer (state = 0, action, props) {
-      log.push(`${props.id}`)
+      log.push(props.id)
       return state
     }
 
@@ -164,22 +164,22 @@ describe('mapReducer', function () {
     store.dispatch({ type: 'PING', id: 0 })
     store.dispatch({ type: 'PING', id: 1 })
     store.dispatch({ type: 'PING', id: 2 })
-    expect(log).to.deep.equal(['0', '0'])
+    expect(log).to.deep.equal([0, 0])
     log = []
 
     store.dispatch({ type: 'INSERT' })
     store.dispatch({ type: 'INSERT' })
-    expect(log).to.deep.equal(['1', '2'])
+    expect(log).to.deep.equal([1, 2])
     log = []
 
     store.dispatch({ type: 'PING', id: 0 })
     store.dispatch({ type: 'PING', id: 1 })
     store.dispatch({ type: 'PING', id: 2 })
-    expect(log).to.deep.equal(['0', '1', '2'])
+    expect(log).to.deep.equal([0, 1, 2])
     log = []
 
     store.dispatch({ type: 'ALL' })
-    expect(log).to.deep.equal(['0', '1', '2'])
+    expect(log).to.deep.equal([0, 1, 2])
   })
 })
 
