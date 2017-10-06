@@ -1,9 +1,15 @@
 import { flattenWrapper, makeWrapper, makeWrapperProto } from './wrapper.js'
 
+function makePropsDefault (state, props) {
+  return props != null && props.peers != null
+    ? props
+    : { ...props, peers: state }
+}
+
 /**
  * Combines several reducers into one.
  */
-export function buildReducer (reducerMap) {
+export function buildReducer (reducerMap, makeProps = makePropsDefault) {
   // Validate argument types:
   if (typeof reducerMap !== 'object' || reducerMap === null) {
     throw new TypeError('The reducer map must be an object.')
@@ -16,7 +22,7 @@ export function buildReducer (reducerMap) {
   }
 
   // Build the wrapper:
-  const wrapperProto = makeWrapperProto(keys, key => reducerMap[key])
+  const wrapperProto = makeWrapperProto(keys, key => reducerMap[key], makeProps)
 
   // Build the default state:
   const defaultState = {}

@@ -5,7 +5,7 @@ const wrapperMagic = 'redux-keto wrapper'
  * Makes a collection of lazy getters for a key-value state slice.
  * The actual wrapper object inherits from this prototype.
  */
-export function makeWrapperProto (keys, makeReducer) {
+export function makeWrapperProto (keys, makeReducer, makeProps) {
   const wrapperProto = Object.create(null)
   for (const key of keys) {
     const reducer = makeReducer(key)
@@ -14,7 +14,8 @@ export function makeWrapperProto (keys, makeReducer) {
       configurable: true,
       enumerable: true,
       get () {
-        const stash = this[wrapperMagic]
+        const wrapper = this
+        const stash = wrapper[wrapperMagic]
 
         // If we are already running, this is a problem!
         if (stash.running[key]) {
@@ -31,13 +32,13 @@ export function makeWrapperProto (keys, makeReducer) {
           const out = reducer(
             stash.state[key],
             stash.action,
-            stash.props,
-            stash.oldProps
+            makeProps(wrapper, stash.props, key),
+            makeProps(stash.state, stash.oldProps, key)
           )
           if (out === undefined) {
             throw new TypeError(`Reducer '${key}' returned undefined`)
           }
-          Object.defineProperty(this, key, {
+          Object.defineProperty(wrapper, key, {
             configurable: true,
             enumerable: true,
             writable: false,
@@ -58,20 +59,12 @@ export function makeWrapperProto (keys, makeReducer) {
  * Makes a lazy wrapper object for a key-value state slice.
  */
 export function makeWrapper (wrapperProto, state, action, props, oldProps) {
-  const needsPeers = props == null || props.peers == null
-
   const wrapper = Object.create(wrapperProto)
   Object.defineProperty(wrapper, wrapperMagic, {
     configurable: true,
     enumerable: false,
     writable: false,
-    value: {
-      state,
-      action,
-      props: needsPeers ? { ...props, peers: wrapper } : props,
-      oldProps: needsPeers ? { ...oldProps, peers: state } : oldProps,
-      running: {}
-    }
+    value: { state, action, props, oldProps, running: {} }
   })
 
   return wrapper

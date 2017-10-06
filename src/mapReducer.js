@@ -28,16 +28,18 @@ export function mapReducer (
       oldProps
     ) {
       let innerAction = filterAction(action, id)
-      const innerProps = filterProps(props, id)
-      const innerOldProps = filterProps(oldProps, id)
 
       if (!innerAction) {
         if (state !== void 0) return state
         innerAction = { type: 'redux-keto props change' }
       }
 
-      return reducer(state, innerAction, innerProps, innerOldProps)
+      return reducer(state, innerAction, props, oldProps)
     }
+  }
+
+  function makeProps (state, props, id) {
+    return filterProps(props, id)
   }
 
   function mapReducer (state = defaultState, action, props, oldProps) {
@@ -46,7 +48,7 @@ export function mapReducer (
     // Try to recycle our wrapper prototype, if possible:
     const wrapperProto =
       state === defaultState || ids !== listIds(oldProps)
-        ? makeWrapperProto(ids, id => wrapChild(id))
+        ? makeWrapperProto(ids, id => wrapChild(id), makeProps)
         : Object.getPrototypeOf(state)
 
     const wrapper = makeWrapper(wrapperProto, state, action, props, oldProps)

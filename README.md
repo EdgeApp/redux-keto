@@ -101,6 +101,17 @@ The second parameter to `filterReducer` is a function that translates the outer 
 
 In this example, `filterReducer` renames the global `props.peers.otherState` into `props.otherState`. Because the inner props don't include a `peers` member, the inner `buildReducer` will add one. This means that the `counter` reducer can continue to refer to `props.peers.maxCount` as before, no matter where it is located in the global state tree.
 
+Alternatively, you can pass a props filter directly to `buildReducer`:
+
+```js
+counterState = buildReducer(
+  { count, maxCount },
+  (peers, props, id) => { peers, otherState: props.peers.otherState }
+)
+```
+
+This has the same effect as the earlier example.
+
 ### Reducer lists
 
 Applications often manage lists of things. For example, a chat platform might manage multiple conversations, each with its own state. To handle cases like this, `redux-keto` provides a `mapReducer` function:
