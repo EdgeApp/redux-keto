@@ -1,5 +1,22 @@
 # redux-keto
 
+## 0.3.0
+
+Breaking changes:
+* The default `buildReducer` behavior is to use its own state as the props now, rather than wrapping it in a `props.peers` property.
+* The `mapReducer` props function now takes a `peers` parameter.
+* `mapReducer` no longer takes an action filter.
+* The `filterAction` and `filterProps` parameters to `filterReducer` have swapped locations.
+* Removed the type definitions. If somebody can set up tooling so we can test these, I'll gladly add them back.
+
+New features:
+* The `buildReducer` function now accepts a `makeProps` parameter.
+* A `memoizeReducer` function to simplify deriving values.
+* Much better control over the `props` construction process.
+
+Known issues:
+* The `filterReducer` function still doesn't diff the props and send dummy actions through when they change.
+
 ## 0.2.1
 
 * Reducers can now have a `defaultState` property, which provides the initial state. This allows `oldProps.peers` to always have a meaningful structure.
