@@ -1,11 +1,11 @@
 import { flattenWrapper } from './wrapper.js'
 
-function filterPropsDefault (props) {
-  return { ...props, peers: undefined }
+function filterActionsDefault (action, props) {
+  return action
 }
 
-function filterActionsDefault (action) {
-  return action
+function filterPropsDefault (props) {
+  return props
 }
 
 /**
@@ -13,13 +13,13 @@ function filterActionsDefault (action) {
  */
 export function filterReducer (
   reducer,
-  filterProps = filterPropsDefault,
-  filterAction = filterActionsDefault
+  filterAction = filterActionsDefault,
+  filterProps = filterPropsDefault
 ) {
   const defaultState = reducer.defaultState
 
   function filteredReducer (state = defaultState, action, props, oldProps) {
-    const innerAction = filterAction(action)
+    const innerAction = filterAction(action, props)
     const innerProps = filterProps(props)
     const innerOldProps = filterProps(oldProps)
 

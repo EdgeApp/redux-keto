@@ -16,7 +16,7 @@ describe('buildReducer', function () {
 
     function counter (state = 0, action, props) {
       return Math.min(
-        props.peers.maxCount,
+        props.maxCount,
         action.type === 'INCREMENT' ? state + action.payload : state
       )
     }
@@ -43,7 +43,7 @@ describe('buildReducer', function () {
   it('provides an `oldProps` property', function () {
     const log = []
     function logger (state = 0, action, props, oldProps) {
-      log.push(props.peers.dirtier === oldProps.peers.dirtier)
+      log.push(props.dirtier === oldProps.dirtier)
       return state
     }
 
@@ -73,11 +73,11 @@ describe('buildReducer', function () {
 
   it('throws on circular references', function () {
     function a (state, action, props) {
-      return props.peers.b
+      return props.b
     }
 
     function b (state, action, props) {
-      return props.peers.a
+      return props.a
     }
 
     const rootReducer = buildReducer({ a, b })
@@ -90,7 +90,7 @@ describe('buildReducer', function () {
   it('copies parent props', function () {
     const log = []
     function logger (state = 0, action, props) {
-      log.push(props.peers.settings)
+      log.push(props.settings)
       return state
     }
 
@@ -114,7 +114,7 @@ describe('filterReducer', function () {
   it('basic functionality', function () {
     const log = []
     function logger (state = 0, action, props) {
-      log.push(props.settings)
+      log.push(props.mySettings)
       return state
     }
 
@@ -126,8 +126,8 @@ describe('filterReducer', function () {
       app: buildReducer({
         logger: filterReducer(
           logger,
-          props => ({ settings: props.peers.settings }),
-          action => action.type !== 'IGNORED'
+          action => action.type !== 'IGNORED',
+          props => ({ mySettings: props.settings })
         )
       }),
       settings
@@ -157,34 +157,28 @@ describe('mapReducer', function () {
     const rootReducer = buildReducer({
       byId: mapReducer(
         childReducer,
-        props => props.peers.list,
-        (props, id) => ({ id }),
-        (action, id) => action.id === id || action.type === 'ALL'
+        props => props.list,
+        (props, peers, id) => ({ id })
       ),
       list
     })
     const store = createStore(rootReducer)
 
     store.dispatch({ type: 'INSERT' })
-    store.dispatch({ type: 'PING', id: 0 })
-    store.dispatch({ type: 'PING', id: 1 })
-    store.dispatch({ type: 'PING', id: 2 })
-    expect(log).to.deep.equal([0, 0])
+    expect(log).to.deep.equal([0])
     log = []
 
     store.dispatch({ type: 'INSERT' })
+    expect(log).to.deep.equal([0, 1])
+    log = []
+
     store.dispatch({ type: 'INSERT' })
-    expect(log).to.deep.equal([1, 2])
-    log = []
-
-    store.dispatch({ type: 'PING', id: 0 })
-    store.dispatch({ type: 'PING', id: 1 })
-    store.dispatch({ type: 'PING', id: 2 })
     expect(log).to.deep.equal([0, 1, 2])
     log = []
 
-    store.dispatch({ type: 'ALL' })
+    store.dispatch({ type: 'PING' })
     expect(log).to.deep.equal([0, 1, 2])
+    log = []
   })
 
   it('merges duplicate keys', function () {
@@ -197,7 +191,7 @@ describe('mapReducer', function () {
     const rootReducer = mapReducer(
       childReducer,
       () => [0, 0, 1, 0, 2, 1],
-      (props, id) => ({ id })
+      (props, peers, id) => ({ id })
     )
     const store = createStore(rootReducer)
     expect(log).to.deep.equal([0, 1, 2])
@@ -213,7 +207,7 @@ describe('memoizeReducer', function () {
     }
 
     const isOdd = memoizeReducer(
-      props => props.peers.counter,
+      props => props.counter,
       counter => {
         log.push(counter)
         return counter % 2 === 1
@@ -242,8 +236,8 @@ describe('memoizeReducer', function () {
     }
 
     const areEqual = memoizeReducer(
-      props => props.peers.counter1,
-      props => props.peers.counter2,
+      props => props.counter1,
+      props => props.counter2,
       (counter1, counter2) => {
         log.push([counter1, counter2])
         return counter1 === counter2
@@ -274,13 +268,12 @@ describe('defaultState', function () {
 
   it('passes through filterReducer', function () {
     function innerReducer (state = defaultState, action, props, oldProps) {
-      expect(oldProps).has.property('peers')
-      expect(oldProps.peers).has.property('level1')
-      expect(oldProps.peers.level1).has.property('level2')
-      expect(oldProps.peers.level1).has.property('sibling', defaultState)
+      expect(oldProps).has.property('level1')
+      expect(oldProps.level1).has.property('level2')
+      expect(oldProps.level1).has.property('sibling', defaultState)
 
-      expect(props.peers.level1.sibling).to.equal(defaultState)
-      // Accessing props.peers.level1.level2 would be circular.
+      expect(props.level1.sibling).to.equal(defaultState)
+      // Accessing props.level1.level2 would be circular.
 
       return state
     }
@@ -296,12 +289,11 @@ describe('defaultState', function () {
 
   it('passes through mapReducer', function () {
     function innerReducer (state = defaultState, action, props, oldProps) {
-      expect(oldProps).has.property('peers')
-      expect(oldProps.peers).has.property('level1')
-      expect(oldProps.peers.level1).to.deep.equal({}) // No ids yet
+      expect(oldProps).has.property('level1')
+      expect(oldProps.level1).to.deep.equal({}) // No ids yet
 
-      expect(props.peers.level1.id.sibling).to.equal(defaultState)
-      // Accessing props.peers.level1.id.level2 would be circular.
+      expect(props.level1.id.sibling).to.equal(defaultState)
+      // Accessing props.level1.id.level2 would be circular.
 
       return state
     }
@@ -310,7 +302,7 @@ describe('defaultState', function () {
       level1: mapReducer(
         buildReducer({ level2: innerReducer, sibling }),
         props => ['id'],
-        props => props
+        (props, peers, id) => props
       )
     })
     rootReducer(void 0, { type: 'INIT' })

@@ -32,8 +32,8 @@ export function makeWrapperProto (keys, makeReducer, makeProps) {
           const out = reducer(
             stash.state[key],
             stash.action,
-            makeProps(wrapper, stash.props, key),
-            makeProps(stash.state, stash.oldProps, key)
+            makeProps(stash.props, wrapper, key),
+            makeProps(stash.oldProps, stash.state, key)
           )
           if (out === undefined) {
             throw new TypeError(`Reducer '${key}' returned undefined`)

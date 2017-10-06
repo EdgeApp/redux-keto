@@ -1,9 +1,7 @@
 import { flattenWrapper, makeWrapper, makeWrapperProto } from './wrapper.js'
 
-function makePropsDefault (state, props) {
-  return props != null && props.peers != null
-    ? props
-    : { ...props, peers: state }
+function makePropsDefault (props, peers, id) {
+  return props != null ? props : peers
 }
 
 /**
