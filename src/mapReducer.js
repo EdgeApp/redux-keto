@@ -23,7 +23,7 @@ export function mapReducer (reducer, listIds, makeProps = makePropsDefault) {
     const wrapper = makeWrapper(wrapperProto, state, action, props, oldProps)
 
     // If we are the topmost fat reducer, flatten the wrappers:
-    return props == null ? flattenWrapper(state, wrapper) : wrapper
+    return props === void 0 ? flattenWrapper(state, wrapper) : wrapper
   }
   mapReducer.defaultState = defaultState
 

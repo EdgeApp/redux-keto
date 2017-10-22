@@ -28,7 +28,7 @@ export function filterReducer (
     const wrapper = reducer(state, innerAction, innerProps, innerOldProps)
 
     // If we are the topmost fat reducer, flatten the wrappers:
-    return props == null ? flattenWrapper(state, wrapper) : wrapper
+    return props === void 0 ? flattenWrapper(state, wrapper) : wrapper
   }
   filteredReducer.defaultState = defaultState
 

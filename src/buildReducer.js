@@ -1,7 +1,7 @@
 import { flattenWrapper, makeWrapper, makeWrapperProto } from './wrapper.js'
 
 function makePropsDefault (props, peers, id) {
-  return props != null ? props : peers
+  return props !== void 0 ? props : peers
 }
 
 /**
@@ -32,7 +32,7 @@ export function buildReducer (reducerMap, makeProps = makePropsDefault) {
     const wrapper = makeWrapper(wrapperProto, state, action, props, oldProps)
 
     // If we are the topmost fat reducer, flatten the wrappers:
-    return props == null ? flattenWrapper(state, wrapper) : wrapper
+    return props === void 0 ? flattenWrapper(state, wrapper) : wrapper
   }
   builtReducer.defaultState = defaultState
 
