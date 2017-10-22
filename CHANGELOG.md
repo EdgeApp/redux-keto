@@ -1,5 +1,10 @@
 # redux-keto
 
+## 0.3.1
+
+Bug fixes:
+* Fixed a case where `memoizeReducer` could return undefined.
+
 ## 0.3.0
 
 Breaking changes:
