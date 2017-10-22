@@ -152,12 +152,12 @@ In this example, the `chatReducer` will only receive actions where the `chatId` 
 
 ## Implementation details
 
-### Default state
-
-The first time a reducer runs, it has no previous props. On the other hand, allowing `oldProps` to just be `undefined` would make writing reducers much more difficult. To solve this, `redux-keto` looks for a property called `defaultState` on each reducer function. If it finds one, it uses that as the initial state and builds the props based on that. This allows `oldProps` to have a useful tree structure, even on the first run.
-
 ### Circular dependencies
 
 The `buildReducer` and `mapReducer` functions create the illusion of time travel by passing their own future state into their children. They achieve this magic using memoized lazy evaluation. Each property of the `peers` object is actually a getter that calls the corresponding child reducer to calculate the new state on the spot (unless the reducer has already run).
 
 This means that circular dependencies will not work. If a reducer tries to read its own output, even indirectly, it will fail with a `ReferenceError`.
+
+### Default state
+
+The first time a reducer runs, it has no previous props. On the other hand, allowing `oldProps` to just be `undefined` would make writing reducers much more difficult. To solve this, `redux-keto` looks for a property called `defaultState` on each reducer function. If it finds one, it uses that as the initial state and builds the props based on that. This allows `oldProps` to have a useful tree structure, even on the first run.
