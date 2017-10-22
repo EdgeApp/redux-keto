@@ -255,6 +255,16 @@ describe('memoizeReducer', function () {
 
     expect(log).to.deep.equal([[0, 0], [1, 0], [1, 1]])
   })
+
+  it('never undefined', function () {
+    const store = createStore(
+      buildReducer({
+        map: buildReducer({}),
+        copy: memoizeReducer(props => props.map, map => map)
+      })
+    )
+    expect(store.getState().copy).to.equal(store.getState().map)
+  })
 })
 
 describe('defaultState', function () {

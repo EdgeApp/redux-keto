@@ -26,7 +26,7 @@ export function memoizeReducer () {
     props,
     oldProps
   ) {
-    let clean = true
+    let clean = state !== undefined
     const args = []
     for (let i = 0; i < filters.length; ++i) {
       args[i] = filters[i](props)
