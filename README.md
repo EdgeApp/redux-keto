@@ -69,7 +69,7 @@ To optimize cases where the props haven't changed, fat reducers receive a copy o
 function countIsOdd (state, action, props, oldProps) {
   if (props.count === oldProps.count) return state
 
-  return props.counter % 2 !== 0
+  return props.counter % 2 === 1
 }
 ```
 
@@ -84,11 +84,11 @@ const isOdd = memoizeReducer(
 )
 ```
 
-The last parameter to `memoizeReducer` is the actual calculation. All the previous parameters are functions that grab items out of the props. If all the items are the same (`===`), `memoizeReducer` just returns the previous state. Otherwise, `memoizeReducer` runs the calculation on the items.
+The last parameter to `memoizeReducer` is the actual calculation. All the previous parameters are functions that grab items out of the props. If all the items are the equal (`===`) to their previous values, `memoizeReducer` just returns the previous state. Otherwise, `memoizeReducer` runs the calculation with the items as parameters.
 
 ## Custom props
 
-By default, `buildReducer` passes `props` through to its children unchanged. If `buildReducer` doesn't receive any props, it initializes `props` with its own future state. This is why the initial example works—the top-level `buildReducer` doesn't recieve any props, so it sets up a `props` object with the future `maxCount` and `counter` states as properties. This also means that if `buildReducer` happens to be the top-most reducer in the Redux store, `peers` will match the Redux state tree returned by `getState()`.
+By default, `buildReducer` passes `props` through to its children unchanged. If `buildReducer` doesn't receive any props, it initializes `props` with its own future state. This is why the initial example works—the top-level `buildReducer` doesn't recieve any props, so it sets up a `props` object with the future `maxCount` and `counter` states as properties. This also means that if `buildReducer` happens to be the top-most reducer in the Redux store, `props` will match the Redux state tree returned by `getState()`.
 
 To customize this behavior, just pass a `makeProps` function as the second parameter to `buildReducer`:
 
@@ -114,7 +114,7 @@ const chatsById = mapReducer(
   chatReducer,
 
   // The list of ids:
-  props => props.peers.activeChatIds,
+  props => props.activeChatIds,
 
   // Filter the props:
   (props, peers, id) => ({ chatId: id, state: props })
@@ -133,7 +133,7 @@ To customize both the props and actions going into an individual reducer, use `f
 const chatReducer = filterReducer(
   chatSubsystem,
 
-  // Filter the actions:
+  // Filter the actions (recieves the outer props):
   (action, props) => {
     if (action.payload.chatId === props.chatId) {
       return action
