@@ -1,7 +1,7 @@
 /**
  * Creates a memoized reducer for derived values.
  * The first aguments are argument filters,
- * which take the props and return an argument to pass to the derivation.
+ * which take the next and return an argument to pass to the derivation.
  * The reducer will only run if some of its arguments are not equal ('===').
  */
 export function memoizeReducer () {
@@ -23,14 +23,14 @@ export function memoizeReducer () {
   return function memoizedReducer (
     state = reducer.defaultState,
     action,
-    props,
-    oldProps
+    next,
+    prev
   ) {
     let clean = state !== undefined
     const args = []
     for (let i = 0; i < filters.length; ++i) {
-      args[i] = filters[i](props)
-      if (clean && args[i] !== filters[i](oldProps)) clean = false
+      args[i] = filters[i](next)
+      if (clean && args[i] !== filters[i](prev)) clean = false
     }
 
     return clean ? state : reducer(...args)

@@ -1,34 +1,34 @@
 import { flattenWrapper } from './wrapper.js'
 
-function filterActionsDefault (action, props) {
+function filterActionsDefault (action, next) {
   return action
 }
 
-function filterPropsDefault (props) {
-  return props
+function filterNextDefault (next) {
+  return next
 }
 
 /**
- * Filters the props and actions going into a fat reducer.
+ * Filters the next and actions going into a fat reducer.
  */
 export function filterReducer (
   reducer,
   filterAction = filterActionsDefault,
-  filterProps = filterPropsDefault
+  filterNext = filterNextDefault
 ) {
   const defaultState = reducer.defaultState
 
-  function filteredReducer (state = defaultState, action, props, oldProps) {
-    const innerAction = filterAction(action, props)
-    const innerProps = filterProps(props)
-    const innerOldProps = filterProps(oldProps)
+  function filteredReducer (state = defaultState, action, next, prev) {
+    const innerAction = filterAction(action, next)
+    const innerNext = filterNext(next)
+    const innerPrev = filterNext(prev)
 
     if (!innerAction) return state
 
-    const wrapper = reducer(state, innerAction, innerProps, innerOldProps)
+    const wrapper = reducer(state, innerAction, innerNext, innerPrev)
 
     // If we are the topmost fat reducer, flatten the wrappers:
-    return props === void 0 ? flattenWrapper(state, wrapper) : wrapper
+    return next === void 0 ? flattenWrapper(state, wrapper) : wrapper
   }
   filteredReducer.defaultState = defaultState
 

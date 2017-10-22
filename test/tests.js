@@ -14,9 +14,9 @@ describe('buildReducer', function () {
       return action.type === 'CHANGE_MAX_COUNT' ? action.payload : state
     }
 
-    function counter (state = 0, action, props) {
+    function counter (state = 0, action, next) {
       return Math.min(
-        props.maxCount,
+        next.maxCount,
         action.type === 'INCREMENT' ? state + action.payload : state
       )
     }
@@ -40,10 +40,10 @@ describe('buildReducer', function () {
     expect(store.getState().counter).to.equal(5)
   })
 
-  it('provides an `oldProps` property', function () {
+  it('provides an `prev` property', function () {
     const log = []
-    function logger (state = 0, action, props, oldProps) {
-      log.push(props.dirtier === oldProps.dirtier)
+    function logger (state = 0, action, next, prev) {
+      log.push(next.dirtier === prev.dirtier)
       return state
     }
 
@@ -72,12 +72,12 @@ describe('buildReducer', function () {
   })
 
   it('throws on circular references', function () {
-    function a (state, action, props) {
-      return props.b
+    function a (state, action, next) {
+      return next.b
     }
 
-    function b (state, action, props) {
-      return props.a
+    function b (state, action, next) {
+      return next.a
     }
 
     const rootReducer = buildReducer({ a, b })
@@ -87,10 +87,10 @@ describe('buildReducer', function () {
     )
   })
 
-  it('copies parent props', function () {
+  it('copies parent next', function () {
     const log = []
-    function logger (state = 0, action, props) {
-      log.push(props.settings)
+    function logger (state = 0, action, next) {
+      log.push(next.settings)
       return state
     }
 
@@ -113,8 +113,8 @@ describe('buildReducer', function () {
 describe('filterReducer', function () {
   it('basic functionality', function () {
     const log = []
-    function logger (state = 0, action, props) {
-      log.push(props.mySettings)
+    function logger (state = 0, action, next) {
+      log.push(next.mySettings)
       return state
     }
 
@@ -127,7 +127,7 @@ describe('filterReducer', function () {
         logger: filterReducer(
           logger,
           action => action.type !== 'IGNORED',
-          props => ({ mySettings: props.settings })
+          next => ({ mySettings: next.settings })
         )
       }),
       settings
@@ -145,8 +145,8 @@ describe('filterReducer', function () {
 describe('mapReducer', function () {
   it('basic functionality', function () {
     let log = []
-    function childReducer (state = 0, action, props) {
-      log.push(props.id)
+    function childReducer (state = 0, action, next) {
+      log.push(next.id)
       return state
     }
 
@@ -157,8 +157,8 @@ describe('mapReducer', function () {
     const rootReducer = buildReducer({
       byId: mapReducer(
         childReducer,
-        props => props.list,
-        (props, peers, id) => ({ id })
+        next => next.list,
+        (next, children, id) => ({ id })
       ),
       list
     })
@@ -183,15 +183,15 @@ describe('mapReducer', function () {
 
   it('merges duplicate keys', function () {
     const log = []
-    function childReducer (state = 0, action, props) {
-      log.push(props.id)
-      return props.id
+    function childReducer (state = 0, action, next) {
+      log.push(next.id)
+      return next.id
     }
 
     const rootReducer = mapReducer(
       childReducer,
       () => [0, 0, 1, 0, 2, 1],
-      (props, peers, id) => ({ id })
+      (next, children, id) => ({ id })
     )
     const store = createStore(rootReducer)
     expect(log).to.deep.equal([0, 1, 2])
@@ -207,7 +207,7 @@ describe('memoizeReducer', function () {
     }
 
     const isOdd = memoizeReducer(
-      props => props.counter,
+      next => next.counter,
       counter => {
         log.push(counter)
         return counter % 2 === 1
@@ -236,8 +236,8 @@ describe('memoizeReducer', function () {
     }
 
     const areEqual = memoizeReducer(
-      props => props.counter1,
-      props => props.counter2,
+      next => next.counter1,
+      next => next.counter2,
       (counter1, counter2) => {
         log.push([counter1, counter2])
         return counter1 === counter2
@@ -260,7 +260,7 @@ describe('memoizeReducer', function () {
     const store = createStore(
       buildReducer({
         map: buildReducer({}),
-        copy: memoizeReducer(props => props.map, map => map)
+        copy: memoizeReducer(next => next.map, map => map)
       })
     )
     expect(store.getState().copy).to.equal(store.getState().map)
@@ -277,13 +277,13 @@ describe('defaultState', function () {
   sibling.defaultState = defaultState
 
   it('passes through filterReducer', function () {
-    function innerReducer (state = defaultState, action, props, oldProps) {
-      expect(oldProps).has.property('level1')
-      expect(oldProps.level1).has.property('level2')
-      expect(oldProps.level1).has.property('sibling', defaultState)
+    function innerReducer (state = defaultState, action, next, prev) {
+      expect(prev).has.property('level1')
+      expect(prev.level1).has.property('level2')
+      expect(prev.level1).has.property('sibling', defaultState)
 
-      expect(props.level1.sibling).to.equal(defaultState)
-      // Accessing props.level1.level2 would be circular.
+      expect(next.level1.sibling).to.equal(defaultState)
+      // Accessing next.level1.level2 would be circular.
 
       return state
     }
@@ -291,19 +291,19 @@ describe('defaultState', function () {
     const rootReducer = buildReducer({
       level1: filterReducer(
         buildReducer({ level2: innerReducer, sibling }),
-        props => props
+        next => next
       )
     })
     rootReducer(void 0, { type: 'INIT' })
   })
 
   it('passes through mapReducer', function () {
-    function innerReducer (state = defaultState, action, props, oldProps) {
-      expect(oldProps).has.property('level1')
-      expect(oldProps.level1).to.deep.equal({}) // No ids yet
+    function innerReducer (state = defaultState, action, next, prev) {
+      expect(prev).has.property('level1')
+      expect(prev.level1).to.deep.equal({}) // No ids yet
 
-      expect(props.level1.id.sibling).to.equal(defaultState)
-      // Accessing props.level1.id.level2 would be circular.
+      expect(next.level1.id.sibling).to.equal(defaultState)
+      // Accessing next.level1.id.level2 would be circular.
 
       return state
     }
@@ -311,8 +311,8 @@ describe('defaultState', function () {
     const rootReducer = buildReducer({
       level1: mapReducer(
         buildReducer({ level2: innerReducer, sibling }),
-        props => ['id'],
-        (props, peers, id) => props
+        next => ['id'],
+        (next, children, id) => next
       )
     })
     rootReducer(void 0, { type: 'INIT' })

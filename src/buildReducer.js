@@ -1,13 +1,13 @@
 import { flattenWrapper, makeWrapper, makeWrapperProto } from './wrapper.js'
 
-function makePropsDefault (props, peers, id) {
-  return props !== void 0 ? props : peers
+function makeNextDefault (next, children, id) {
+  return next !== void 0 ? next : children
 }
 
 /**
  * Combines several reducers into one.
  */
-export function buildReducer (reducerMap, makeProps = makePropsDefault) {
+export function buildReducer (reducerMap, makeNext = makeNextDefault) {
   // Validate argument types:
   if (typeof reducerMap !== 'object' || reducerMap === null) {
     throw new TypeError('The reducer map must be an object.')
@@ -20,7 +20,7 @@ export function buildReducer (reducerMap, makeProps = makePropsDefault) {
   }
 
   // Build the wrapper:
-  const wrapperProto = makeWrapperProto(keys, key => reducerMap[key], makeProps)
+  const wrapperProto = makeWrapperProto(keys, key => reducerMap[key], makeNext)
 
   // Build the default state:
   const defaultState = {}
@@ -28,11 +28,11 @@ export function buildReducer (reducerMap, makeProps = makePropsDefault) {
     defaultState[key] = reducerMap[key].defaultState
   }
 
-  function builtReducer (state = defaultState, action, props, oldProps) {
-    const wrapper = makeWrapper(wrapperProto, state, action, props, oldProps)
+  function builtReducer (state = defaultState, action, next, prev) {
+    const wrapper = makeWrapper(wrapperProto, state, action, next, prev)
 
     // If we are the topmost fat reducer, flatten the wrappers:
-    return props === void 0 ? flattenWrapper(state, wrapper) : wrapper
+    return next === void 0 ? flattenWrapper(state, wrapper) : wrapper
   }
   builtReducer.defaultState = defaultState
 
