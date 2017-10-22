@@ -1,7 +1,13 @@
 import { flattenWrapper, makeWrapper, makeWrapperProto } from './wrapper.js'
 
 function makeNextDefault (next, children, id) {
-  return { peers: children, id }
+  return {
+    id,
+    root: next !== void 0 ? next : children,
+    get self () {
+      return children[id]
+    }
+  }
 }
 
 const defaultState = {}

@@ -117,13 +117,25 @@ const chatsById = mapReducer(
   next => next.activeChatIds,
 
   // Set up `next` for each child:
-  (next, children, id) => ({ chatId: id, state: next })
+  (next, children, id) => ({
+    chatId: id,
+    root: next,
+    get self () {
+      return children[id]
+    }
+  })
 )
 ```
 
 The first `mapReducer` parameter is the reducer to replicate, and the second parameter returns a list of ids. There will be one `chatReducer` for each unique id (duplicates are ignored).
 
-The final parameter is a `makeNext` function, just like the one `buildReducer` accepts. In this example, each chat reducer receives a `chatId` property plus access to outer `next` as `state`.
+The final parameter is a `makeNext` function, just like the one `buildReducer` accepts. If this isn't provided, `mapReducer` will create a default `next` parameter with the following properties:
+
+* `id` - the current child's id.
+* `root` - the `next` parameter passed to `mapReducer`, or `children` if `next` is undefined.
+* `self` - the current child's future state.
+
+If you want to replicate this behavior yourself, be sure to implement `self` using a getter function, as shown above. Otherwise, you may get a [circular reference error](#circular-dependencies).
 
 ### Isolated reducers
 
@@ -144,7 +156,7 @@ const chatReducer = filterReducer(
   },
 
   // Adjust `next` for the child:
-  next => ({ settings: next.state.chatSettings })
+  next => ({ settings: next.root.chatSettings })
 )
 ```
 

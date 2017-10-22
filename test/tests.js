@@ -155,11 +155,7 @@ describe('mapReducer', function () {
     }
 
     const rootReducer = buildReducer({
-      byId: mapReducer(
-        childReducer,
-        next => next.list,
-        (next, children, id) => ({ id })
-      ),
+      byId: mapReducer(childReducer, next => next.list),
       list
     })
     const store = createStore(rootReducer)
@@ -188,14 +184,44 @@ describe('mapReducer', function () {
       return next.id
     }
 
-    const rootReducer = mapReducer(
-      childReducer,
-      () => [0, 0, 1, 0, 2, 1],
-      (next, children, id) => ({ id })
-    )
+    const rootReducer = mapReducer(childReducer, () => [0, 0, 1, 0, 2, 1])
     const store = createStore(rootReducer)
     expect(log).to.deep.equal([0, 1, 2])
     expect(store.getState()).to.deep.equal({ '0': 0, '1': 1, '2': 2 })
+  })
+
+  it('provides a default `next`', function () {
+    const log = []
+    function childReducer (state, action, next) {
+      log.push(next)
+      return 'me'
+    }
+
+    const rootReducer = mapReducer(childReducer, () => [0])
+    const store = createStore(rootReducer)
+    expect(log).to.deep.equal([
+      {
+        id: 0,
+        self: 'me',
+        root: store.getState()
+      }
+    ])
+  })
+
+  it('can customize `next`', function () {
+    const log = []
+    function childReducer (state, action, next) {
+      log.push(next)
+      return 'me'
+    }
+
+    const rootReducer = mapReducer(
+      childReducer,
+      () => [0],
+      (next, children, id) => ({ childId: id })
+    )
+    createStore(rootReducer)
+    expect(log).to.deep.equal([{ childId: 0 }])
   })
 })
 
