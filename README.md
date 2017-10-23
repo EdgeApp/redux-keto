@@ -63,11 +63,11 @@ function countIsEven (state, action, next) {
 
 Now `countIsEven` will stay in sync with the `counter` no matter what happens. Because this is just a normal reducer, it will also appear in `next` so other reducers can access it.
 
-To optimize cases where the state hasn't changed, fat reducers also recieve a `prev` parameter, which holds the state *before* the current action. The reducer can compare the two states to see if it needs to run:
+To optimize cases where the state hasn't changed, fat reducers also recieve a `prev` parameter, which holds the state *before* the current action. The reducer can compare the two states to see if it needs to do any work:
 
 ```js
 function countIsOdd (state, action, next, prev) {
-  if (next.count === prev.count) return state
+  if (next.counter === prev.counter) return state
 
   return next.counter % 2 === 1
 }
@@ -75,7 +75,7 @@ function countIsOdd (state, action, next, prev) {
 
 Now the `countIsOdd` calculation will only run when the counter actually changes.
 
-To automate this, use the `memoizeReducer` function. This function works a lot like the [reselect](https://github.com/reactjs/reselect) library, but for reducers:
+To automate this, `redux-keto` provides a `memoizeReducer` function. This function works a lot like the [reselect](https://github.com/reactjs/reselect) library, but for reducers:
 
 ```js
 const isOdd = memoizeReducer(
@@ -88,7 +88,7 @@ The last parameter to `memoizeReducer` is the actual calculation. All the previo
 
 ## Customizing `next`
 
-By default, `buildReducer` passes `next` through to its children unchanged. If `buildReducer` doesn't receive a `next` parameter, it initializes `next` with its own children. This is why the initial example works—the top-level `buildReducer` doesn't recieve a `next` parameter, so it sets up a `next` object with the `maxCount` and `counter` states as properties. This also means that if `buildReducer` happens to be the top-most reducer in the Redux store, `next` will match the Redux state tree returned by `getState()`.
+By default, `buildReducer` passes `next` through to its children unchanged. If `buildReducer` doesn't receive a `next` parameter, it initializes `next` with its own children. This is why the initial example works—the top-level `buildReducer` doesn't recieve a `next` parameter, so it sets up a `next` object with the future `maxCount` and `counter` states as properties. This also means that if `buildReducer` happens to be the top-most reducer in the Redux store, `next` will match the Redux state tree returned by `getState()`.
 
 To customize this behavior, just pass a `makeNext` function as the second parameter to `buildReducer`:
 
