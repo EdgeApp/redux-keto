@@ -1,5 +1,13 @@
 # redux-keto
 
+## 0.3.2
+
+* Renamed `props` to `next`.
+* Fat reducers no longer act as the top-level if `next` is `null`.
+* Changed the default `mapReducer` behavior when no `makeNext` function is present.
+
+While the `mapReducer` change is technically breaking, the previous behavior was never documented, including the fact that `makeNext` was optional in the first place. So, at least no documented behavior has changed.
+
 ## 0.3.1
 
 Bug fixes:
