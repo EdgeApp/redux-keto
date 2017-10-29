@@ -43,7 +43,7 @@ function rootReducer (state = { count: 0, maxCount: 0 }, action) {
 
 This works correctly, but it requires mixing together different concerns.
 
-Imagine a racing simulator where the maximum speed depends on dozens of other parameters, such as engine power, driver weight, slope, wind, tire grip, and so forth. Pretty soon half the app ends up as a single giant reducer, which isn't maintainable. With `redux-keto`, all these values can be separte reducers with values flowing between them naturally.
+Imagine a racing simulator where the maximum speed depends on dozens of other parameters, such as engine power, driver weight, slope, wind, tire grip, and so forth. Pretty soon half the app ends up as a single giant reducer, which isn't maintainable. With `redux-keto`, all these values can be separate reducers with values flowing between them naturally.
 
 ## `redux-thunk` Solutions
 
@@ -78,7 +78,7 @@ const counter = (state = 0, action) => {
 const rootReducer = combineReducers({ maxCount, counter })
 ```
 
-This allows `maxCount` to have its own simple reducer, but comes at a terrible price. The `INCREMENT` action now depends on the state of the store, which reqiures a special action creator.
+This allows `maxCount` to have its own simple reducer, but comes at a terrible price. The `INCREMENT` action now depends on the state of the store, which requires a special action creator.
 
 On top of this, the `counter` reducer still needs to be aware of the `CHANGE_MAX_COUNT` action, so the two concerns aren't even that well separated.
 
