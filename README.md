@@ -4,14 +4,14 @@
 
 The Redux architecture works best when the reducers contain as much business logic as possible. Doing this in practice is hard, though, since reducers can't pass values between each other.
 
-This library provide a way to build "fat reducers", which take an extra `next` argument in addition to the normal `state` and `action` arguments. Fat reducers use this extra parameter to pass values between each other in a fully-reactive, auto-updating way.
+This library provides a way to build "fat reducers", which take an extra `next` argument in addition to the normal `state` and `action` arguments. Fat reducers use this extra parameter to pass values between each other in a fully-reactive, auto-updating way.
 
 Fat reducers work seamlessly with normal reducers, so there are no big changes to the way Redux works. Just use fat reducers wherever they make sense.
 
 ## Table of contents
 1. [Example](#example)
 2. [Derived state](#derived-state)
-3. [Customing `next`](#customizing-next)
+3. [Customizing `next`](#customizing-next)
    1. [Reducer lists](#reducer-lists)
    1. [Isolated reducers](#isolated-reducers)
 4. [Implementation details](#implementation-details)
@@ -63,7 +63,7 @@ function countIsEven (state, action, next) {
 
 Now `countIsEven` will stay in sync with the `counter` no matter what happens. Because this is just a normal reducer, it will also appear in `next` so other reducers can access it.
 
-To optimize cases where the state hasn't changed, fat reducers also recieve a `prev` parameter, which holds the state *before* the current action. The reducer can compare the two states to see if it needs to do any work:
+To optimize cases where the state hasn't changed, fat reducers also receive a `prev` parameter, which holds the state *before* the current action. The reducer can compare the two states to see if it needs to do any work:
 
 ```js
 function countIsOdd (state, action, next, prev) {
@@ -88,7 +88,7 @@ The last parameter to `memoizeReducer` is the actual calculation. All the previo
 
 ## Customizing `next`
 
-By default, `buildReducer` passes `next` through to its children unchanged. If `buildReducer` doesn't receive a `next` parameter, it initializes `next` with its own children. This is why the initial example works—the top-level `buildReducer` doesn't recieve a `next` parameter, so it sets up a `next` object with the future `maxCount` and `counter` states as properties. This also means that if `buildReducer` happens to be the top-most reducer in the Redux store, `next` will match the Redux state tree returned by `getState()`.
+By default, `buildReducer` passes `next` through to its children unchanged. If `buildReducer` doesn't receive a `next` parameter, it initializes `next` with its own children. This is why the initial example works—the top-level `buildReducer` doesn't receive a `next` parameter, so it sets up a `next` object with the future `maxCount` and `counter` states as properties. This also means that if `buildReducer` happens to be the top-most reducer in the Redux store, `next` will match the Redux state tree returned by `getState()`.
 
 To customize this behavior, just pass a `makeNext` function as the second parameter to `buildReducer`:
 
@@ -145,7 +145,7 @@ To customize both the actions and `next` parameter going into an individual redu
 const chatReducer = filterReducer(
   chatSubsystem,
 
-  // Filter the actions (recieves the outer `next` parameter):
+  // Filter the actions (receives the outer `next` parameter):
   (action, next) => {
     if (action.payload.chatId === next.chatId) {
       return action
