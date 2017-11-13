@@ -2,6 +2,8 @@
 
 > A tool for building fat reducers
 
+[![npm downloads](https://img.shields.io/npm/dm/redux-keto.svg?style=flat-square)](https://www.npmjs.com/package/redux-keto)
+
 The Redux architecture works best when the reducers contain as much business logic as possible. Doing this in practice is hard, though, since reducers can't pass values between each other.
 
 This library provides a way to build "fat reducers", which take an extra `next` argument in addition to the normal `state` and `action` arguments. Fat reducers use this extra parameter to pass values between each other in a fully-reactive, auto-updating way.
