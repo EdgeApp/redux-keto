@@ -1,10 +1,11 @@
 {
-  "extends": ["standard"],
-  "plugins": ["standard"],
+  "extends": [
+    "standard-kit/prettier"
+  ],
+  "plugins": [
+    "simple-import-sort"
+  ],
   "rules": {
-    "camelcase": "error",
-    "no-throw-literal": "error",
-    "no-var": "error",
-    "prefer-const": "error"
+    "simple-import-sort/sort": "error"
   }
 }

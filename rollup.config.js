@@ -1,4 +1,5 @@
-import buble from 'rollup-plugin-buble'
+import buble from '@rollup/plugin-buble'
+
 import packageJson from './package.json'
 
 const bubleOpts = {
@@ -9,9 +10,8 @@ const bubleOpts = {
 export default {
   input: 'src/index.js',
   output: [
-    { file: packageJson.main, format: 'cjs' },
-    { file: packageJson.module, format: 'es' }
+    { file: packageJson.main, format: 'cjs', sourcemap: true },
+    { file: packageJson.module, format: 'es', sourcemap: true }
   ],
-  plugins: [buble(bubleOpts)],
-  sourcemap: true
+  plugins: [buble(bubleOpts)]
 }
