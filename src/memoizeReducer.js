@@ -4,7 +4,7 @@
  * which take the next and return an argument to pass to the derivation.
  * The reducer will only run if some of its arguments are not equal ('===').
  */
-export function memoizeReducer () {
+export function memoizeReducer() {
   let i = arguments.length - 1
   const reducer = arguments[i]
   const filters = []
@@ -20,7 +20,7 @@ export function memoizeReducer () {
     }
   }
 
-  return function memoizedReducer (
+  return function memoizedReducer(
     state = reducer.defaultState,
     action,
     next,

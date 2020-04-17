@@ -1,13 +1,13 @@
 import { flattenWrapper, makeWrapper, makeWrapperProto } from './wrapper.js'
 
-function makeNextDefault (next, children, id) {
-  return next !== void 0 ? next : children
+function makeNextDefault(next, children, id) {
+  return next !== undefined ? next : children
 }
 
 /**
  * Combines several reducers into one.
  */
-export function buildReducer (reducerMap, makeNext = makeNextDefault) {
+export function buildReducer(reducerMap, makeNext = makeNextDefault) {
   // Validate argument types:
   if (typeof reducerMap !== 'object' || reducerMap === null) {
     throw new TypeError('The reducer map must be an object.')
@@ -28,11 +28,11 @@ export function buildReducer (reducerMap, makeNext = makeNextDefault) {
     defaultState[key] = reducerMap[key].defaultState
   }
 
-  function builtReducer (state = defaultState, action, next, prev) {
+  function builtReducer(state = defaultState, action, next, prev) {
     const wrapper = makeWrapper(wrapperProto, state, action, next, prev)
 
     // If we are the topmost fat reducer, flatten the wrappers:
-    return next === void 0 ? flattenWrapper(state, wrapper) : wrapper
+    return next === undefined ? flattenWrapper(state, wrapper) : wrapper
   }
   builtReducer.defaultState = defaultState
 

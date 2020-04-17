@@ -1,20 +1,21 @@
+import { expect } from 'chai'
+import { describe, it } from 'mocha'
+import { createStore } from 'redux'
+
 import {
   buildReducer,
   filterReducer,
   mapReducer,
   memoizeReducer
 } from '../src/index.js'
-import { expect } from 'chai'
-import { describe, it } from 'mocha'
-import { createStore } from 'redux'
 
 describe('buildReducer', function () {
   it('runs readme example', function () {
-    function maxCount (state = 0, action) {
+    function maxCount(state = 0, action) {
       return action.type === 'CHANGE_MAX_COUNT' ? action.payload : state
     }
 
-    function counter (state = 0, action, next) {
+    function counter(state = 0, action, next) {
       return Math.min(
         next.maxCount,
         action.type === 'INCREMENT' ? state + action.payload : state
@@ -42,12 +43,12 @@ describe('buildReducer', function () {
 
   it('provides an `prev` property', function () {
     const log = []
-    function logger (state = 0, action, next, prev) {
+    function logger(state = 0, action, next, prev) {
       log.push(next.dirtier === prev.dirtier)
       return state
     }
 
-    function dirtier (state = 0, action) {
+    function dirtier(state = 0, action) {
       return action.type === 'DIRTY' ? state + 1 : state
     }
 
@@ -60,7 +61,7 @@ describe('buildReducer', function () {
   })
 
   it('throws on undefined state', function () {
-    function tester (state) {
+    function tester(state) {
       return state
     }
 
@@ -72,11 +73,11 @@ describe('buildReducer', function () {
   })
 
   it('throws on circular references', function () {
-    function a (state, action, next) {
+    function a(state, action, next) {
       return next.b
     }
 
-    function b (state, action, next) {
+    function b(state, action, next) {
       return next.a
     }
 
@@ -89,12 +90,12 @@ describe('buildReducer', function () {
 
   it('copies parent next', function () {
     const log = []
-    function logger (state = 0, action, next) {
+    function logger(state = 0, action, next) {
       log.push(next.settings)
       return state
     }
 
-    function settings (state = 0, action) {
+    function settings(state = 0, action) {
       return action.type === 'DIRTY' ? state + 1 : state
     }
 
@@ -113,12 +114,12 @@ describe('buildReducer', function () {
 describe('filterReducer', function () {
   it('basic functionality', function () {
     const log = []
-    function logger (state = 0, action, next) {
+    function logger(state = 0, action, next) {
       log.push(next.mySettings)
       return state
     }
 
-    function settings (state = 0, action) {
+    function settings(state = 0, action) {
       return action.type === 'DIRTY' ? state + 1 : state
     }
 
@@ -145,12 +146,12 @@ describe('filterReducer', function () {
 describe('mapReducer', function () {
   it('basic functionality', function () {
     let log = []
-    function childReducer (state = 0, action, next) {
+    function childReducer(state = 0, action, next) {
       log.push(next.id)
       return state
     }
 
-    function list (state = [], action) {
+    function list(state = [], action) {
       return action.type === 'INSERT' ? [...state, state.length] : state
     }
 
@@ -179,7 +180,7 @@ describe('mapReducer', function () {
 
   it('merges duplicate keys', function () {
     const log = []
-    function childReducer (state = 0, action, next) {
+    function childReducer(state = 0, action, next) {
       log.push(next.id)
       return next.id
     }
@@ -192,7 +193,7 @@ describe('mapReducer', function () {
 
   it('provides a default `next`', function () {
     const log = []
-    function childReducer (state, action, next) {
+    function childReducer(state, action, next) {
       log.push(next)
       return 'me'
     }
@@ -210,7 +211,7 @@ describe('mapReducer', function () {
 
   it('can customize `next`', function () {
     const log = []
-    function childReducer (state, action, next) {
+    function childReducer(state, action, next) {
       log.push(next)
       return 'me'
     }
@@ -228,7 +229,7 @@ describe('mapReducer', function () {
 describe('memoizeReducer', function () {
   it('readme example', function () {
     const log = []
-    function counter (state = 0, action) {
+    function counter(state = 0, action) {
       return action.type === 'INCREMENT' ? state + 1 : state
     }
 
@@ -254,10 +255,10 @@ describe('memoizeReducer', function () {
 
   it('multiple arguments', function () {
     const log = []
-    function counter1 (state = 0, action) {
+    function counter1(state = 0, action) {
       return action.type === 'INCREMENT1' ? state + 1 : state
     }
-    function counter2 (state = 0, action) {
+    function counter2(state = 0, action) {
       return action.type === 'INCREMENT2' ? state + 1 : state
     }
 
@@ -279,14 +280,21 @@ describe('memoizeReducer', function () {
     store.dispatch({ type: 'IGNORED' })
     expect(store.getState().areEqual).to.equal(true)
 
-    expect(log).to.deep.equal([[0, 0], [1, 0], [1, 1]])
+    expect(log).to.deep.equal([
+      [0, 0],
+      [1, 0],
+      [1, 1]
+    ])
   })
 
   it('never undefined', function () {
     const store = createStore(
       buildReducer({
         map: buildReducer({}),
-        copy: memoizeReducer(next => next.map, map => map)
+        copy: memoizeReducer(
+          next => next.map,
+          map => map
+        )
       })
     )
     expect(store.getState().copy).to.equal(store.getState().map)
@@ -296,14 +304,14 @@ describe('memoizeReducer', function () {
 describe('defaultState', function () {
   // A reducer with its own defaultState:
   const defaultState = new Date()
-  function sibling (state) {
+  function sibling(state) {
     expect(state).to.equal(defaultState)
     return state
   }
   sibling.defaultState = defaultState
 
   it('passes through filterReducer', function () {
-    function innerReducer (state = defaultState, action, next, prev) {
+    function innerReducer(state = defaultState, action, next, prev) {
       expect(prev).has.property('level1')
       expect(prev.level1).has.property('level2')
       expect(prev.level1).has.property('sibling', defaultState)
@@ -320,11 +328,11 @@ describe('defaultState', function () {
         next => next
       )
     })
-    rootReducer(void 0, { type: 'INIT' })
+    rootReducer(undefined, { type: 'INIT' })
   })
 
   it('passes through mapReducer', function () {
-    function innerReducer (state = defaultState, action, next, prev) {
+    function innerReducer(state = defaultState, action, next, prev) {
       expect(prev).has.property('level1')
       expect(prev.level1).to.deep.equal({}) // No ids yet
 
@@ -341,6 +349,6 @@ describe('defaultState', function () {
         (next, children, id) => next
       )
     })
-    rootReducer(void 0, { type: 'INIT' })
+    rootReducer(undefined, { type: 'INIT' })
   })
 })

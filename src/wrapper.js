@@ -5,7 +5,7 @@ const wrapperMagic = 'redux-keto wrapper'
  * Makes a collection of lazy getters for a key-value state slice.
  * The actual wrapper object inherits from this prototype.
  */
-export function makeWrapperProto (keys, makeReducer, makeNext) {
+export function makeWrapperProto(keys, makeReducer, makeNext) {
   const wrapperProto = Object.create(null)
   for (const key of keys) {
     const reducer = makeReducer(key)
@@ -13,7 +13,7 @@ export function makeWrapperProto (keys, makeReducer, makeNext) {
     Object.defineProperty(wrapperProto, key, {
       configurable: true,
       enumerable: true,
-      get () {
+      get() {
         const wrapper = this
         const stash = wrapper[wrapperMagic]
 
@@ -58,7 +58,7 @@ export function makeWrapperProto (keys, makeReducer, makeNext) {
 /**
  * Makes a lazy wrapper object for a key-value state slice.
  */
-export function makeWrapper (wrapperProto, state, action, next, prev) {
+export function makeWrapper(wrapperProto, state, action, next, prev) {
   const wrapper = Object.create(wrapperProto)
   Object.defineProperty(wrapper, wrapperMagic, {
     configurable: true,
@@ -74,7 +74,7 @@ export function makeWrapper (wrapperProto, state, action, next, prev) {
  * Flattens a lazy key-value wrapper into a plain-old object
  * with the current state as its properties.
  */
-export function flattenWrapper (state = {}, wrapper) {
+export function flattenWrapper(state = {}, wrapper) {
   // If it's not a wrapper, we are done:
   if (wrapper === null || wrapper[wrapperMagic] == null) return wrapper
 
