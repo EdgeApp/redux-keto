@@ -13,6 +13,7 @@
   ],
   "main": "lib/redux-keto.js",
   "module": "lib/redux-keto.es.js",
+  "types": "src/redux-keto.d.ts",
   "files": [
     "CHANGELOG.md",
     "README.md",
