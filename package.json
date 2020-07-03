@@ -11,6 +11,8 @@
   "contributors": [
     "William Swanson <william@airbitz.co>"
   ],
+  "main": "lib/redux-keto.js",
+  "module": "lib/redux-keto.es.js",
   "files": [
     "CHANGELOG.md",
     "README.md",
@@ -18,8 +20,6 @@
     "package.json",
     "src/*"
   ],
-  "main": "lib/redux-keto.js",
-  "module": "lib/redux-keto.es.js",
   "scripts": {
     "build": "rollup -c",
     "build:test": "rollup -c rollup.config.test.js",
