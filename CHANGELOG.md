@@ -1,5 +1,9 @@
 # redux-keto
 
+## 0.3.4 (2020-07-07)
+
+- Include Typescript definitions with the library.
+
 ## 0.3.3 (2020-04-20)
 
 - Include Flow type definitions with the library.
