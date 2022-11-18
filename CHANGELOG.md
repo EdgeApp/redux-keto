@@ -1,12 +1,16 @@
 # redux-keto
 
+## 0.3.5 (2022-11-18)
+
+- fixed: Give `state` the correct TypeScript type in `buildReducer`.
+
 ## 0.3.4 (2020-07-07)
 
-- Include Typescript definitions with the library.
+- added: Include Typescript definitions with the library.
 
 ## 0.3.3 (2020-04-20)
 
-- Include Flow type definitions with the library.
+- added: Include Flow type definitions with the library.
 
 ## 0.3.2
 
