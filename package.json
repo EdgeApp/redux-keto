@@ -4,7 +4,7 @@
   "description": "A tool for building fat reducers",
   "repository": {
     "type": "git",
-    "url": "git@github.com:Airbitz/redux-keto.git"
+    "url": "git@github.com:EdgeApp/redux-keto.git"
   },
   "license": "MIT",
   "author": "Airbitz, Inc.",
