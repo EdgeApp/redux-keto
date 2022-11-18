@@ -13,12 +13,7 @@ export type BuiltReducer<State, Action, Next = State> = (
 ) => State
 
 type ReducerMap<State, Action, Next> = {
-  [Name in keyof State]: (
-    state: any, // Should be State[Name] | undefined,
-    action: Action,
-    next: Next,
-    prev: Next
-  ) => State[Name]
+  [Name in keyof State]: FatReducer<State[Name], Action, Next>
 }
 
 export declare function buildReducer<State, Action, Next>(
