@@ -2,6 +2,7 @@
 
 > A tool for building fat reducers
 
+[![Unit Tests](https://github.com/EdgeApp/redux-keto/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/EdgeApp/redux-keto/actions/workflows/unit-tests.yml/)
 [![npm downloads](https://img.shields.io/npm/dm/redux-keto.svg?style=flat-square)](https://www.npmjs.com/package/redux-keto)
 
 The Redux architecture works best when the reducers contain as much business logic as possible. Doing this in practice is hard, though, since reducers can't pass values between each other.
